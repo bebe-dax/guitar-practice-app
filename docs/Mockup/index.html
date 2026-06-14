@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guitar Practice — UIモックアップ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══════ サイドバー ═══════ -->
+<aside class="sidebar">
+  <div class="logo"><span class="mark">♪</span><span class="txt">Guitar Practice</span></div>
+  <button class="nav-item active" data-nav="home"><span class="ic">◉</span><span class="lbl">スケール &amp; 指板</span></button>
+  <button class="nav-item" data-nav="list"><span class="ic">≡</span><span class="lbl">コード進行</span></button>
+  <button class="nav-item" data-nav="new"><span class="ic">+</span><span class="lbl">新規作成</span></button>
+  <div class="spacer"></div>
+  <div class="ver">mockup v1.2</div>
+</aside>
+<button class="sb-toggle" id="sbToggle" title="サイドバーを開閉">◀</button>
+
+<div class="main">
+
+<!-- ═══════ 画面1: ホーム ═══════ -->
+<section class="screen visible" id="scr-home">
+  <div class="page-head">
+    <div>
+      <div class="page-title">スケール &amp; 指板</div>
+      <div class="page-sub">キーとスケールを選んで、構成音を指板で確認</div>
+    </div>
+  </div>
+
+  <!-- 上段: 指板 -->
+  <div class="card fb-card">
+    <div class="label">指板<span class="hint" id="fretRangeHint">フレット 1–12</span></div>
+    <div class="fretboard-wrap"><svg class="fb-svg" id="fbSvg"></svg></div>
+    <div class="fb-foot">
+      <span class="lbl">開始フレット</span>
+      <input type="range" id="fretSlider" min="0" max="12" value="0">
+      <span class="val" id="fretVal">0</span>
+      <div class="legend">
+        <span><span class="dot r"></span>ルート音</span>
+        <span><span class="dot n"></span>構成音</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 下段: 選択エリア + 理論情報エリア -->
+  <div class="home-bottom">
+    <div class="card select-card">
+      <div>
+        <div class="label">キー</div>
+        <div class="pill-row" id="keyPills"></div>
+      </div>
+      <div>
+        <div class="label">スケール</div>
+        <select id="scaleSelect">
+          <option value="major">Major</option>
+          <option value="minor">Natural Minor</option>
+          <option value="majorPent">Major Pentatonic</option>
+          <option value="minorPent" selected>Minor Pentatonic</option>
+          <option value="blues">Blues</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="theory-section">
+        <div class="label">構成音<span class="hint" id="scaleNameHint"></span></div>
+        <div class="note-badges" id="noteBadges"></div>
+      </div>
+      <div class="theory-section">
+        <div class="label">ダイアトニックコード<span class="hint" id="diaHint"></span></div>
+        <div class="dia-row" id="diaRow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 画面2: コード進行一覧 ═══════ -->
+<section class="screen" id="scr-list">
+  <div class="page-head">
+    <div>
+      <div class="page-title">コード進行</div>
+      <div class="page-sub">保存したコード進行とフレーズ</div>
+    </div>
+    <button class="btn primary" onclick="nav('new')">+ 新規作成</button>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" placeholder="タイトル・コードで検索...">
+    <div class="filter-tabs">
+      <button class="ftab sel">すべて</button>
+      <button class="ftab">コード進行</button>
+      <button class="ftab">フレーズ</button>
+    </div>
+  </div>
+
+  <div class="prog-grid">
+    <div class="prog-card ac-blue" onclick="nav('detail')">
+      <div class="row1"><span class="type-badge">コード進行</span><span class="date">2026/05/30</span></div>
+      <h3>I–V–vi–IV（定番ポップス）</h3>
+      <div class="meta">Key: C / Major</div>
+      <div class="chord-pills"><span class="chord-pill">C</span><span class="chord-pill">G</span><span class="chord-pill">Am</span><span class="chord-pill">F</span></div>
+      <div class="memo">Cメジャーのど定番。J-POPにもよく出てくる進行。</div>
+    </div>
+    <div class="prog-card ac-purple" onclick="nav('detail')">
+      <div class="row1"><span class="type-badge">コード進行</span><span class="date">2026/05/28</span></div>
+      <h3>Am–F–C–G（マイナー系）</h3>
+      <div class="meta">Key: Am / Natural Minor</div>
+      <div class="chord-pills"><span class="chord-pill">Am</span><span class="chord-pill">F</span><span class="chord-pill">C</span><span class="chord-pill">G</span></div>
+      <div class="memo">哀愁感のある王道マイナー進行。</div>
+    </div>
+    <div class="prog-card ac-amber" onclick="nav('detail')">
+      <div class="row1"><span class="type-badge">フレーズ</span><span class="date">2026/05/25</span></div>
+      <h3>ブルースリフ フレーズA</h3>
+      <div class="meta">Key: A / Blues</div>
+      <div class="chord-pills"><span class="chord-pill">A7</span><span class="chord-pill">D7</span><span class="chord-pill">E7</span></div>
+      <div class="memo">Aブルーススケールを使ったオープニングリフ。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 画面3: 新規作成 ═══════ -->
+<section class="screen" id="scr-new">
+  <div class="page-head">
+    <div>
+      <div class="page-title">新規作成</div>
+      <div class="page-sub">コード進行・フレーズを登録</div>
+    </div>
+  </div>
+
+  <div class="form-grid">
+    <div class="card">
+      <div class="field">
+        <div class="label">タイプ</div>
+        <div class="seg">
+          <button class="sel">コード進行</button>
+          <button>フレーズ</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">タイトル</div>
+        <input type="text" placeholder="例: I–V–vi–IV（定番ポップス）" value="I–V–vi–IV（定番ポップス）">
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <div class="label">キー</div>
+          <select><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>A</option><option>B</option></select>
+        </div>
+        <div class="field">
+          <div class="label">スケール</div>
+          <select><option>Major</option><option>Natural Minor</option><option>Major Pentatonic</option><option>Minor Pentatonic</option><option>Blues</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">コード進行<span class="hint">クリックで削除 / Enterで追加</span></div>
+        <div class="chord-builder">
+          <span class="chord-token">C<span class="x">✕</span></span>
+          <span class="chord-token">G<span class="x">✕</span></span>
+          <span class="chord-token">Am<span class="x">✕</span></span>
+          <span class="chord-token">F<span class="x">✕</span></span>
+          <input class="chord-add" type="text" placeholder="+ コード名">
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">メモ</div>
+        <textarea placeholder="この進行についてのメモ...">Cメジャーのど定番。J-POPにもよく出てくる進行。</textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn ghost" onclick="nav('list')">キャンセル</button>
+        <button class="btn primary" onclick="nav('list')">保存する</button>
+      </div>
+    </div>
+
+    <div class="card preview-card">
+      <div class="label">プレビュー<span class="hint">選択中: C</span></div>
+      <div class="fretboard-wrap"><svg class="fb-svg" id="fbSvgPreview"></svg></div>
+      <div class="stepper">
+        <button class="step-chord sm now">C</button>
+        <button class="step-chord sm">G</button>
+        <button class="step-chord sm">Am</button>
+        <button class="step-chord sm">F</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 画面4: 詳細 ═══════ -->
+<section class="screen" id="scr-detail">
+  <div class="detail-head">
+    <div>
+      <div class="badge-row"><span class="type-badge ac-blue">コード進行</span></div>
+      <div class="page-title">I–V–vi–IV（定番ポップス）</div>
+      <div class="page-sub">2026/05/30 作成 ・ 2026/05/30 更新</div>
+    </div>
+    <div class="actions">
+      <button class="btn">編集</button>
+      <button class="btn danger ghost">削除</button>
+    </div>
+  </div>
+
+  <!-- 上段: 指板 -->
+  <div class="card fb-card">
+    <div class="label">指板プレビュー<span class="hint" id="detailFbHint">C の構成音 (C, E, G)</span></div>
+    <div class="fretboard-wrap"><svg class="fb-svg" id="fbSvgDetail"></svg></div>
+  </div>
+
+  <!-- 下段: 情報 + ステッパー -->
+  <div class="detail-bottom">
+    <div class="card">
+      <div class="kv-col">
+        <div><div class="k">キー / スケール</div><div class="v">C / Major</div></div>
+        <div>
+          <div class="k">メモ</div>
+          <div class="memo-text">Cメジャーのど定番。J-POPにもよく出てくる進行。サビでよく使われる。</div>
+        </div>
+        <div>
+          <div class="k">共有リンク</div>
+          <div class="share-box">
+            <input type="text" readonly value="https://app.example.com/p/x7Kp2q">
+            <button class="btn">コピー</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">コード進行<span class="hint">クリックで指板に表示</span></div>
+      <div class="stepper" id="detailStepper">
+        <button class="step-chord now" data-chord="C">C</button><span class="step-arrow">→</span>
+        <button class="step-chord" data-chord="G">G</button><span class="step-arrow">→</span>
+        <button class="step-chord" data-chord="Am">Am</button><span class="step-arrow">→</span>
+        <button class="step-chord" data-chord="F">F</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="mock-note">UI MOCKUP — interactive prototype</div>
+
+<script src="app.js"></script>
+</body>
+</html>
