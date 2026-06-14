@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ギター練習支援アプリ
 
-## Getting Started
+キー・スケール・コードを指板で確認できるWebアプリ。
 
-First, run the development server:
+## 技術スタック
+
+| 項目 | 技術 |
+| --- | --- |
+| フレームワーク | Next.js 15 (App Router) |
+| 言語 | TypeScript |
+| スタイリング | Tailwind CSS v4 |
+| 音楽理論 | Tonal.js |
+| 指板描画 | SVG（カスタム実装） |
+| データ永続化 | localStorage（Phase 1） |
+| ホスティング | Vercel |
+
+## 開発環境のセットアップ
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000) でアプリが起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## コマンド
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| コマンド | 説明 |
+| --- | --- |
+| `npm run dev` | 開発サーバー起動 |
+| `npm run build` | 本番ビルド |
+| `npm run start` | 本番サーバー起動 |
+| `npm run lint` | ESLint 実行 |
 
-## Learn More
+## ブランチ戦略
 
-To learn more about Next.js, take a look at the following resources:
+| ブランチ | 用途 |
+| --- | --- |
+| `main` | 本番（Vercel デプロイ対象） |
+| `develop` | 開発ベース |
+| `feature/xxx` | 各 Issue 対応ブランチ |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ディレクトリ構成
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/            # Next.js App Router（ページ・レイアウト・CSS）
+├── components/     # UIコンポーネント
+│   ├── fretboard/  # 指板SVG描画
+│   ├── scale/      # キー・スケール選択UI
+│   └── layout/     # サイドバーレイアウト
+├── hooks/          # カスタムフック
+├── lib/
+│   └── music/      # Tonal.jsラッパー（コンポーネントから直接importしない）
+└── types/          # ドメイン型定義
+```
