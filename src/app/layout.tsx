@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono, Zen_Kaku_Gothic_New } from "next/font/google";
+import Sidebar from "@/components/layout/Sidebar";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -33,7 +34,12 @@ export default function RootLayout({
       lang="ja"
       className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${zenKakuGothicNew.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-bg text-text-pri font-ui">{children}</body>
+      <body className="flex h-full overflow-hidden bg-bg text-text-pri font-ui">
+        <Sidebar />
+        <main className="flex-1 h-screen overflow-y-auto p-[22px_32px_28px]">
+          {children}
+        </main>
+      </body>
     </html>
   );
 }
