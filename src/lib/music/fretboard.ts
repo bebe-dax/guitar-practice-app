@@ -6,6 +6,7 @@ export type FretboardNote = {
   string: number  // 0=6弦, 5=1弦
   fret: number
   note: string    // オクターブあり 例: "C4"
+  pc: NotePC      // ピッチクラス 例: "C"
   isRoot: boolean
 }
 
@@ -30,6 +31,7 @@ export function getNotesOnFretboard(
           string: stringIndex,
           fret,
           note: noteWithOct,
+          pc,
           isRoot: pc === rootNote,
         })
       }
