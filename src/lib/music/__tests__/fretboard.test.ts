@@ -36,11 +36,13 @@ describe('getNotesOnFretboard', () => {
 
   it('スケール外の音は含まれない', () => {
     const notes = getNotesOnFretboard(C_MAJOR, 'C', 0, 12)
-    notes.forEach(n => {
-      const { Note } = require('tonal')
-      const pc = Note.pitchClass(n.note)
-      expect(C_MAJOR).toContain(pc)
-    })
+    notes.forEach(n => expect(C_MAJOR).toContain(n.pc))
+  })
+
+  it('pc フィールドが正しく設定される', () => {
+    const notes = getNotesOnFretboard(C_MAJOR, 'C', 0, 0)
+    const e2 = notes.find(n => n.note === 'E2')
+    expect(e2?.pc).toBe('E')
   })
 
   it('空のスケールを渡すと空配列を返す', () => {

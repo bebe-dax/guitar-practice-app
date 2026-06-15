@@ -18,6 +18,8 @@
   --color-text-pri: #f2f2f5;
   --color-text-sec: #8d8d99;
   --color-text-mut: #5c5c68;
+  --color-fret-wire: #4a4a55;
+  --color-string: #767682;
 
   /* フォント */
   --font-ui: var(--font-space-grotesk), 'Zen Kaku Gothic New', sans-serif;
