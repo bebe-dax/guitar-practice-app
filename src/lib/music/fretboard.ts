@@ -18,6 +18,11 @@ export function getNotesOnFretboard(
 ): FretboardNote[] {
   const result: FretboardNote[] = []
 
+  // Note.fromMidi はフラット系、Scale.get はシャープ系を返す場合があるため
+  // Note.chroma (0-11) でエンハーモニック等価な音を統一比較する
+  const scaleChromaSet = new Set(scaleNotes.map(n => Note.chroma(n)))
+  const rootChroma = Note.chroma(rootNote)
+
   STANDARD_TUNING.forEach((openNote, stringIndex) => {
     const midiOpen = Note.midi(openNote) ?? 0
 
@@ -25,14 +30,15 @@ export function getNotesOnFretboard(
       const midi = midiOpen + fret
       const noteWithOct = Note.fromMidi(midi)
       const pc = Note.pitchClass(noteWithOct)
+      const chroma = Note.chroma(pc)
 
-      if (scaleNotes.includes(pc)) {
+      if (chroma !== undefined && scaleChromaSet.has(chroma)) {
         result.push({
           string: stringIndex,
           fret,
           note: noteWithOct,
           pc,
-          isRoot: pc === rootNote,
+          isRoot: chroma === rootChroma,
         })
       }
     }

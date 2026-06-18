@@ -48,4 +48,35 @@ describe('getNotesOnFretboard', () => {
   it('空のスケールを渡すと空配列を返す', () => {
     expect(getNotesOnFretboard([], 'C', 0, 12)).toEqual([])
   })
+
+  // エンハーモニック（シャープ/フラット不一致）の修正確認
+  it('G major で F# 位置のドットが表示される', () => {
+    // G major: G A B C D E F# — Scale.get はシャープ系を返す
+    const G_MAJOR = ['G', 'A', 'B', 'C', 'D', 'E', 'F#']
+    const notes = getNotesOnFretboard(G_MAJOR, 'G', 0, 12)
+    // 6弦1フレット = F2 ではなく、どこかに F# が含まれるはず（6弦2フレット = F#2）
+    const fSharpNotes = notes.filter(n => n.fret > 0).filter(n => {
+      const { Note } = require('tonal')
+      return Note.chroma(n.pc) === Note.chroma('F#')
+    })
+    expect(fSharpNotes.length).toBeGreaterThan(0)
+  })
+
+  it('D major で F#/C# 位置のドットが表示される', () => {
+    const D_MAJOR = ['D', 'E', 'F#', 'G', 'A', 'B', 'C#']
+    const notes = getNotesOnFretboard(D_MAJOR, 'D', 0, 12)
+    const { Note } = require('tonal')
+    const fSharpNotes = notes.filter(n => Note.chroma(n.pc) === Note.chroma('F#'))
+    const cSharpNotes = notes.filter(n => Note.chroma(n.pc) === Note.chroma('C#'))
+    expect(fSharpNotes.length).toBeGreaterThan(0)
+    expect(cSharpNotes.length).toBeGreaterThan(0)
+  })
+
+  it('シャープ系スケールでスケール外の音は含まれない', () => {
+    const G_MAJOR = ['G', 'A', 'B', 'C', 'D', 'E', 'F#']
+    const notes = getNotesOnFretboard(G_MAJOR, 'G', 0, 12)
+    const { Note } = require('tonal')
+    const scaleChromaSet = new Set(G_MAJOR.map(n => Note.chroma(n)))
+    notes.forEach(n => expect(scaleChromaSet.has(Note.chroma(n.pc))).toBe(true))
+  })
 })
