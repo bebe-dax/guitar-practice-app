@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { getScaleNotes } from '@/lib/music/scale'
+import { getScaleNotes, getRelativeKey } from '@/lib/music/scale'
 import { getDiatonicChords } from '@/lib/music/chord'
 import { DEFAULT_FRET_START } from '@/lib/music/constants'
 import type { NotePC, ScaleName } from '@/types/music'
@@ -49,5 +49,16 @@ export function useScale() {
   const scaleNotes = useMemo(() => getScaleNotes(key, scaleName), [key, scaleName])
   const diatonicChords = useMemo(() => getDiatonicChords(key, isMinor), [key, isMinor])
 
-  return { key, setKey, scaleName, setScaleName, fretStart, setFretStart, scaleNotes, diatonicChords, isMinor }
+  // スケール種別が変わるときに相対調へキーを自動更新する
+  // localStorage 復元時は生の setScaleName を使うため自動連動は発生しない
+  function changeScale(newScale: ScaleName) {
+    const wasMinor = MINOR_SCALE_NAMES.includes(scaleName)
+    const willBeMinor = MINOR_SCALE_NAMES.includes(newScale)
+    if (wasMinor !== willBeMinor) {
+      setKey(getRelativeKey(key, willBeMinor))
+    }
+    setScaleName(newScale)
+  }
+
+  return { key, setKey, scaleName, setScaleName: changeScale, fretStart, setFretStart, scaleNotes, diatonicChords, isMinor }
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getScaleNotes } from '../scale'
+import { getScaleNotes, getRelativeKey } from '../scale'
 import { getDiatonicChords } from '../chord'
 
 describe('getScaleNotes', () => {
@@ -21,6 +21,36 @@ describe('getScaleNotes', () => {
 
   it('A blues', () => {
     expect(getScaleNotes('A', 'blues')).toEqual(['A', 'C', 'D', 'Eb', 'E', 'G'])
+  })
+})
+
+describe('getRelativeKey', () => {
+  it('長調→短調: C major → A minor', () => {
+    expect(getRelativeKey('C', true)).toBe('A')
+  })
+  it('長調→短調: G major → E minor', () => {
+    expect(getRelativeKey('G', true)).toBe('E')
+  })
+  it('長調→短調: F major → D minor', () => {
+    expect(getRelativeKey('F', true)).toBe('D')
+  })
+  it('長調→短調: D major → B minor', () => {
+    expect(getRelativeKey('D', true)).toBe('B')
+  })
+  it('短調→長調: A minor → C major', () => {
+    expect(getRelativeKey('A', false)).toBe('C')
+  })
+  it('短調→長調: E minor → G major', () => {
+    expect(getRelativeKey('E', false)).toBe('G')
+  })
+  it('短調→長調: B minor → D major', () => {
+    expect(getRelativeKey('B', false)).toBe('D')
+  })
+  it('相対調が非自然音の場合は元のキーを返す（E major → C# minor は E のまま）', () => {
+    expect(getRelativeKey('E', true)).toBe('E')
+  })
+  it('相対調が非自然音の場合は元のキーを返す（C minor → Eb major は C のまま）', () => {
+    expect(getRelativeKey('C', false)).toBe('C')
   })
 })
 
