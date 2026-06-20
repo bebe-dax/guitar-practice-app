@@ -49,34 +49,35 @@ describe('getNotesOnFretboard', () => {
     expect(getNotesOnFretboard([], 'C', 0, 12)).toEqual([])
   })
 
-  // エンハーモニック（シャープ/フラット不一致）の修正確認
-  it('G major で F# 位置のドットが表示される', () => {
-    // G major: G A B C D E F# — Scale.get はシャープ系を返す
+  // エンハーモニック対応: ポジション表示と音名ラベルの両方を確認
+  it('G major で F# 位置が表示され、ラベルが F#（Gb でない）', () => {
     const G_MAJOR = ['G', 'A', 'B', 'C', 'D', 'E', 'F#']
     const notes = getNotesOnFretboard(G_MAJOR, 'G', 0, 12)
-    // 6弦1フレット = F2 ではなく、どこかに F# が含まれるはず（6弦2フレット = F#2）
-    const fSharpNotes = notes.filter(n => n.fret > 0).filter(n => {
-      const { Note } = require('tonal')
-      return Note.chroma(n.pc) === Note.chroma('F#')
-    })
+    const fSharpNotes = notes.filter(n => n.pc === 'F#')
     expect(fSharpNotes.length).toBeGreaterThan(0)
+    // Gb というラベルのドットは存在しない
+    expect(notes.some(n => n.pc === 'Gb')).toBe(false)
   })
 
-  it('D major で F#/C# 位置のドットが表示される', () => {
+  it('D major で F#/C# ラベルで表示される（Gb/Db でない）', () => {
     const D_MAJOR = ['D', 'E', 'F#', 'G', 'A', 'B', 'C#']
     const notes = getNotesOnFretboard(D_MAJOR, 'D', 0, 12)
-    const { Note } = require('tonal')
-    const fSharpNotes = notes.filter(n => Note.chroma(n.pc) === Note.chroma('F#'))
-    const cSharpNotes = notes.filter(n => Note.chroma(n.pc) === Note.chroma('C#'))
-    expect(fSharpNotes.length).toBeGreaterThan(0)
-    expect(cSharpNotes.length).toBeGreaterThan(0)
+    expect(notes.filter(n => n.pc === 'F#').length).toBeGreaterThan(0)
+    expect(notes.filter(n => n.pc === 'C#').length).toBeGreaterThan(0)
+    expect(notes.some(n => n.pc === 'Gb')).toBe(false)
+    expect(notes.some(n => n.pc === 'Db')).toBe(false)
+  })
+
+  it('F major で Bb ラベルで表示される（A# でない）', () => {
+    const F_MAJOR = ['F', 'G', 'A', 'Bb', 'C', 'D', 'E']
+    const notes = getNotesOnFretboard(F_MAJOR, 'F', 0, 12)
+    expect(notes.filter(n => n.pc === 'Bb').length).toBeGreaterThan(0)
+    expect(notes.some(n => n.pc === 'A#')).toBe(false)
   })
 
   it('シャープ系スケールでスケール外の音は含まれない', () => {
     const G_MAJOR = ['G', 'A', 'B', 'C', 'D', 'E', 'F#']
     const notes = getNotesOnFretboard(G_MAJOR, 'G', 0, 12)
-    const { Note } = require('tonal')
-    const scaleChromaSet = new Set(G_MAJOR.map(n => Note.chroma(n)))
-    notes.forEach(n => expect(scaleChromaSet.has(Note.chroma(n.pc))).toBe(true))
+    notes.forEach(n => expect(G_MAJOR).toContain(n.pc))
   })
 })

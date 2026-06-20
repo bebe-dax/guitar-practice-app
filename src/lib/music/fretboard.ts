@@ -18,9 +18,14 @@ export function getNotesOnFretboard(
 ): FretboardNote[] {
   const result: FretboardNote[] = []
 
-  // Note.fromMidi はフラット系、Scale.get はシャープ系を返す場合があるため
-  // Note.chroma (0-11) でエンハーモニック等価な音を統一比較する
-  const scaleChromaSet = new Set(scaleNotes.map(n => Note.chroma(n)))
+  // Note.fromMidi はフラット系（Gb 等）、Scale.get はシャープ系（F# 等）も返す。
+  // chroma (0-11) でエンハーモニック等価な音を一致判定し、
+  // 表示ラベル (pc) はスケール側の音名を使って音楽的に正しい表記にする。
+  const chromaToScaleNote = new Map<number, NotePC>()
+  scaleNotes.forEach(n => {
+    const c = Note.chroma(n)
+    if (c !== undefined) chromaToScaleNote.set(c, n)
+  })
   const rootChroma = Note.chroma(rootNote)
 
   STANDARD_TUNING.forEach((openNote, stringIndex) => {
@@ -29,15 +34,14 @@ export function getNotesOnFretboard(
     for (let fret = fretStart; fret <= fretEnd; fret++) {
       const midi = midiOpen + fret
       const noteWithOct = Note.fromMidi(midi)
-      const pc = Note.pitchClass(noteWithOct)
-      const chroma = Note.chroma(pc)
+      const chroma = Note.chroma(Note.pitchClass(noteWithOct))
 
-      if (chroma !== undefined && scaleChromaSet.has(chroma)) {
+      if (chroma !== undefined && chromaToScaleNote.has(chroma)) {
         result.push({
           string: stringIndex,
           fret,
           note: noteWithOct,
-          pc,
+          pc: chromaToScaleNote.get(chroma) as NotePC,  // G major → 'F#' not 'Gb'
           isRoot: chroma === rootChroma,
         })
       }
