@@ -55,15 +55,58 @@ describe('getRelativeKey', () => {
 })
 
 describe('getDiatonicChords', () => {
-  it('C major ダイアトニックコード', () => {
-    expect(getDiatonicChords('C', false)).toEqual([
-      'Cmaj7', 'Dm7', 'Em7', 'Fmaj7', 'G7', 'Am7', 'Bm7b5',
+  it('C major: 7和音 + 親キー度数', () => {
+    expect(getDiatonicChords('C', 'major')).toEqual([
+      { chord: 'Cmaj7', degree: 'I' },
+      { chord: 'Dm7', degree: 'ii' },
+      { chord: 'Em7', degree: 'iii' },
+      { chord: 'Fmaj7', degree: 'IV' },
+      { chord: 'G7', degree: 'V' },
+      { chord: 'Am7', degree: 'vi' },
+      { chord: 'Bm7b5', degree: 'vii°' },
     ])
   })
 
-  it('A minor ダイアトニックコード', () => {
-    expect(getDiatonicChords('A', true)).toEqual([
-      'Am7', 'Bm7b5', 'Cmaj7', 'Dm7', 'Em7', 'Fmaj7', 'G7',
+  it('A minor: 7和音 + 親キー度数', () => {
+    expect(getDiatonicChords('A', 'minor')).toEqual([
+      { chord: 'Am7', degree: 'i' },
+      { chord: 'Bm7b5', degree: 'ii°' },
+      { chord: 'Cmaj7', degree: 'III' },
+      { chord: 'Dm7', degree: 'iv' },
+      { chord: 'Em7', degree: 'v' },
+      { chord: 'Fmaj7', degree: 'VI' },
+      { chord: 'G7', degree: 'VII' },
+    ])
+  })
+
+  it('C major pentatonic: スケール構成音に対応する 5 和音（IV と vii° を除外）', () => {
+    expect(getDiatonicChords('C', 'major pentatonic')).toEqual([
+      { chord: 'Cmaj7', degree: 'I' },
+      { chord: 'Dm7', degree: 'ii' },
+      { chord: 'Em7', degree: 'iii' },
+      { chord: 'G7', degree: 'V' },
+      { chord: 'Am7', degree: 'vi' },
+    ])
+  })
+
+  it('A minor pentatonic: スケール構成音に対応する 5 和音（ii° と VI を除外）', () => {
+    expect(getDiatonicChords('A', 'minor pentatonic')).toEqual([
+      { chord: 'Am7', degree: 'i' },
+      { chord: 'Cmaj7', degree: 'III' },
+      { chord: 'Dm7', degree: 'iv' },
+      { chord: 'Em7', degree: 'v' },
+      { chord: 'G7', degree: 'VII' },
+    ])
+  })
+
+  it('A blues: minor pentatonic + ブルーノート Eb（度数 ♭v）', () => {
+    expect(getDiatonicChords('A', 'blues')).toEqual([
+      { chord: 'Am7', degree: 'i' },
+      { chord: 'Cmaj7', degree: 'III' },
+      { chord: 'Dm7', degree: 'iv' },
+      { chord: 'Eb', degree: '♭v' },
+      { chord: 'Em7', degree: 'v' },
+      { chord: 'G7', degree: 'VII' },
     ])
   })
 })

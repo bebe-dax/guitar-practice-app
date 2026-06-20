@@ -73,7 +73,7 @@ export default function Home() {
               <span className="text-text-sec">ダイアトニックコード</span>
               <span className="text-[11px] text-text-mut font-normal">{key}{isMinor ? 'm' : ''} キー</span>
             </div>
-            <DiatonicChordList chords={diatonicChords} isMinor={isMinor} />
+            <DiatonicChordList chords={diatonicChords} />
           </div>
         </div>
       </div>

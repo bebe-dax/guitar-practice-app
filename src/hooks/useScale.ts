@@ -1,10 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
-import { getScaleNotes, getRelativeKey } from '@/lib/music/scale'
+import { getScaleNotes, getRelativeKey, isMinorScale } from '@/lib/music/scale'
 import { getDiatonicChords } from '@/lib/music/chord'
 import { DEFAULT_FRET_START } from '@/lib/music/constants'
 import type { NotePC, ScaleName } from '@/types/music'
 
-const MINOR_SCALE_NAMES: ScaleName[] = ['minor', 'minor pentatonic', 'blues']
 const STORAGE_KEY = 'guitar-app:scale'
 
 type ScaleStorage = {
@@ -45,15 +44,15 @@ export function useScale() {
     persistScaleState({ key, scaleName, fretStart })
   }, [key, scaleName, fretStart])
 
-  const isMinor = MINOR_SCALE_NAMES.includes(scaleName)
+  const isMinor = isMinorScale(scaleName)
   const scaleNotes = useMemo(() => getScaleNotes(key, scaleName), [key, scaleName])
-  const diatonicChords = useMemo(() => getDiatonicChords(key, isMinor), [key, isMinor])
+  const diatonicChords = useMemo(() => getDiatonicChords(key, scaleName), [key, scaleName])
 
   // スケール種別が変わるときに相対調へキーを自動更新する
   // localStorage 復元時は生の setScaleName を使うため自動連動は発生しない
   function changeScale(newScale: ScaleName) {
-    const wasMinor = MINOR_SCALE_NAMES.includes(scaleName)
-    const willBeMinor = MINOR_SCALE_NAMES.includes(newScale)
+    const wasMinor = isMinorScale(scaleName)
+    const willBeMinor = isMinorScale(newScale)
     if (wasMinor !== willBeMinor) {
       setKey(getRelativeKey(key, willBeMinor))
     }

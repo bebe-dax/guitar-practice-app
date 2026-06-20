@@ -1,6 +1,12 @@
 import { Scale, Key } from 'tonal'
 import type { NotePC, ScaleName } from '@/types/music'
 
+const MINOR_PARITY_SCALES: ScaleName[] = ['minor', 'minor pentatonic', 'blues']
+
+export function isMinorScale(scaleName: ScaleName): boolean {
+  return MINOR_PARITY_SCALES.includes(scaleName)
+}
+
 export function getScaleNotes(key: NotePC, scaleName: ScaleName): NotePC[] {
   return Scale.get(`${key} ${scaleName}`).notes
 }
