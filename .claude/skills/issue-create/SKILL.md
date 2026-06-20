@@ -1,5 +1,5 @@
 ---
-name: guitar-practice-app-create-issue
+name: issue-create
 description: guitar-practice-appリポジトリにGitHub Issueを作成するスキル。「Issueを立てて」「○○をIssueにして」「新しいIssueを作成して」と言われたときに使用する。docsの要件定義・技術設計を参照して内容を整理し、既存Issueと統一感のあるフォーマットで作成する。
 ---
 
