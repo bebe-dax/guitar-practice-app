@@ -26,7 +26,10 @@
 
 ## プッシュ規約
 
-- 自己判断でのmainブランチへのpushを禁止する
+- main/master への直接 commit/push は禁止
+- 作業は必ず feature ブランチで行う
+- push 前に必ず確認を求める
+- PR 経由でのみ main にマージする
 
 ## Issue管理
 
