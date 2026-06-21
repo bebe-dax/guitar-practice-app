@@ -16,13 +16,13 @@ export default function ProgressionsPage() {
 
   return (
     <div className="flex flex-col h-full gap-4">
-      <div className="flex items-center justify-between flex-shrink-0">
-        <div>
+      <div className="flex items-center justify-between flex-shrink-0 pl-[52px] md:pl-0 gap-3">
+        <div className="min-w-0">
           <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">コード進行</div>
           <div className="text-[12px] text-text-sec mt-[3px] font-jp">保存したコード進行とフレーズ</div>
         </div>
-        <Link href="/progressions/new">
-          <button className="text-[13px] font-medium font-jp px-[16px] py-[8px] rounded-[9px] bg-accent text-bg hover:opacity-90 transition-opacity">
+        <Link href="/progressions/new" className="flex-shrink-0">
+          <button className="text-[13px] font-medium font-jp px-[14px] md:px-[16px] py-[8px] rounded-[9px] bg-accent text-bg hover:opacity-90 transition-opacity whitespace-nowrap">
             + 新規作成
           </button>
         </Link>
@@ -53,7 +53,7 @@ export default function ProgressionsPage() {
           )}
         </div>
       ) : (
-        <div className="grid gap-[14px] overflow-y-auto" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        <div className="grid gap-[14px] overflow-y-auto grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((progression, i) => (
             <ProgressionCard key={progression.id} progression={progression} index={i} />
           ))}
