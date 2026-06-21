@@ -4,15 +4,26 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProgressions } from '@/hooks/useProgressions'
 import { useScale } from '@/hooks/useScale'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import ProgressionEditor from '@/components/progression/ProgressionEditor'
 import Fretboard from '@/components/fretboard/Fretboard'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
+import {
+  DEFAULT_FRET_WIDTH,
+  MOBILE_FRET_WIDTH,
+  MAX_FRET_START,
+  MOBILE_MAX_FRET_START,
+} from '@/lib/music/constants'
 import type { NotePC, ScaleName, ChordName } from '@/types/music'
 
 export default function NewProgressionPage() {
   const router = useRouter()
   const { save } = useProgressions()
   const { scaleNotes, fretStart, setFretStart } = useScale()
+  const isCompactFretboard = useIsMobile(1024)
+  const fretWidth = isCompactFretboard ? MOBILE_FRET_WIDTH : DEFAULT_FRET_WIDTH
+  const maxFretStart = isCompactFretboard ? MOBILE_MAX_FRET_START : MAX_FRET_START
+  const clampedFretStart = Math.min(fretStart, maxFretStart)
 
   const [title, setTitle] = useState('')
   const [keyNote, setKeyNote] = useState<NotePC>('C')
@@ -59,10 +70,10 @@ export default function NewProgressionPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <Fretboard scaleNotes={scaleNotes} rootNote={keyNote} fretStart={fretStart} />
+            <Fretboard scaleNotes={scaleNotes} rootNote={keyNote} fretStart={clampedFretStart} fretWidth={fretWidth} />
           </div>
 
-          <FretRangeSlider value={fretStart} onChange={setFretStart} />
+          <FretRangeSlider value={clampedFretStart} onChange={setFretStart} max={maxFretStart} />
 
           {chords.length > 0 && (
             <div className="flex gap-2 flex-wrap pt-2 border-t border-border">

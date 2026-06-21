@@ -3,9 +3,17 @@
 import { use, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProgressions } from '@/hooks/useProgressions'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { getChordNotes, getChordRoot } from '@/lib/music/chord'
 import { getNotesOnFretboard } from '@/lib/music/fretboard'
-import { DEFAULT_FRET_START, DEFAULT_FRET_WIDTH, SCALE_OPTIONS } from '@/lib/music/constants'
+import {
+  DEFAULT_FRET_START,
+  DEFAULT_FRET_WIDTH,
+  MOBILE_FRET_WIDTH,
+  MAX_FRET_START,
+  MOBILE_MAX_FRET_START,
+  SCALE_OPTIONS,
+} from '@/lib/music/constants'
 import Fretboard from '@/components/fretboard/Fretboard'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
 import ProgressionPlayer from '@/components/progression/ProgressionPlayer'
@@ -22,10 +30,16 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   const router = useRouter()
   const { progressions, remove, update } = useProgressions()
 
+  const isCompactFretboard = useIsMobile(1024)
+  const fretWidth = isCompactFretboard ? MOBILE_FRET_WIDTH : DEFAULT_FRET_WIDTH
+  const maxFretStart = isCompactFretboard ? MOBILE_MAX_FRET_START : MAX_FRET_START
+
   const [selectedChordIdx, setSelectedChordIdx] = useState(0)
   const [fretStart, setFretStart] = useState(DEFAULT_FRET_START)
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const clampedFretStart = Math.min(fretStart, maxFretStart)
 
   // 編集フォーム用state
   const [editTitle, setEditTitle] = useState('')
@@ -52,8 +66,8 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
 
   const fretboardNotes = useMemo(() => {
     if (chordNotes.length === 0) return []
-    return getNotesOnFretboard(chordNotes, chordRoot, fretStart, fretStart + DEFAULT_FRET_WIDTH)
-  }, [chordNotes, chordRoot, fretStart])
+    return getNotesOnFretboard(chordNotes, chordRoot, clampedFretStart, clampedFretStart + fretWidth)
+  }, [chordNotes, chordRoot, clampedFretStart, fretWidth])
 
   if (progressions.length > 0 && !progression) {
     router.replace('/progressions')
@@ -161,10 +175,10 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
           </span>
         </div>
         <div className="overflow-x-auto">
-          <Fretboard scaleNotes={chordNotes} rootNote={chordRoot} fretStart={fretStart} />
+          <Fretboard scaleNotes={chordNotes} rootNote={chordRoot} fretStart={clampedFretStart} fretWidth={fretWidth} />
         </div>
         <div className="mt-[10px]">
-          <FretRangeSlider value={fretStart} onChange={setFretStart} />
+          <FretRangeSlider value={clampedFretStart} onChange={setFretStart} max={maxFretStart} />
         </div>
       </div>
 
