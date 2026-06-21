@@ -35,7 +35,7 @@ export default function Fretboard({ scaleNotes, rootNote, fretStart }: Props) {
   const fx = (fret: number) => PAD_L + (fret - fretStart - 1) * FRET_W + FRET_W / 2
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="block w-full">
+    <svg viewBox={`0 0 ${W} ${H}`} className="block min-w-[1024px] w-full max-w-none">
       {/* 指板面 */}
       <rect
         x={PAD_L} y={PAD_T - 8}

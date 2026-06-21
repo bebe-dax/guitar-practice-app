@@ -32,12 +32,12 @@ export default function NewProgressionPage() {
 
   return (
     <div className="flex flex-col h-full gap-4">
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 pl-[52px] md:pl-0">
         <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">新規作成</div>
         <div className="text-[12px] text-text-sec mt-[3px] font-jp">コード進行を登録</div>
       </div>
 
-      <div className="grid gap-4 flex-1 min-h-0" style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'start' }}>
+      <div className="grid gap-4 flex-1 min-h-0 grid-cols-1 lg:grid-cols-2 lg:items-start">
         {/* 左: フォーム */}
         <ProgressionEditor
           title={title} onTitleChange={setTitle}

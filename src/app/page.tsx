@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full gap-4">
       {/* ページヘッダー */}
-      <div className="flex items-center justify-between flex-shrink-0">
+      <div className="flex items-center justify-between flex-shrink-0 pl-[52px] md:pl-0">
         <div>
           <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">スケール &amp; 指板</div>
           <div className="text-[12px] text-text-sec mt-[3px] font-jp">キーとスケールを選んで、構成音を指板で確認</div>
@@ -36,17 +36,14 @@ export default function Home() {
         <div className="overflow-x-auto">
           <Fretboard scaleNotes={scaleNotes} rootNote={key} fretStart={fretStart} />
         </div>
-        <div className="flex items-center gap-4 mt-[10px]">
+        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 mt-[10px]">
           <FretRangeSlider value={fretStart} onChange={setFretStart} />
           <FretboardLegend />
         </div>
       </div>
 
       {/* 下段: 選択エリア + 理論情報エリア */}
-      <div
-        className="grid gap-4 flex-1 min-h-0"
-        style={{ gridTemplateColumns: '360px 1fr', alignItems: 'stretch' }}
-      >
+      <div className="grid gap-4 flex-1 min-h-0 grid-cols-1 md:[grid-template-columns:360px_1fr] md:items-stretch">
         {/* 選択エリア */}
         <div className="bg-surface border border-border rounded-[14px] p-[18px_20px] flex flex-col gap-4 justify-center">
           <div>

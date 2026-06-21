@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, JetBrains_Mono, Zen_Kaku_Gothic_New } from "next/font/google";
 import Sidebar from "@/components/layout/Sidebar";
 import "./globals.css";
@@ -24,6 +24,12 @@ export const metadata: Metadata = {
   description: "キー・スケール・コードを指板で確認できるWebアプリ",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,7 +42,7 @@ export default function RootLayout({
     >
       <body className="flex h-full overflow-hidden bg-bg text-text-pri font-ui">
         <Sidebar />
-        <main className="flex-1 h-screen overflow-y-auto p-[22px_32px_28px]">
+        <main className="flex-1 min-w-0 h-screen overflow-y-auto p-[18px_16px_22px] md:p-[22px_32px_28px]">
           {children}
         </main>
       </body>

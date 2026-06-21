@@ -86,7 +86,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   if (isEditing) {
     return (
       <div className="flex flex-col h-full gap-4">
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 pl-[52px] md:pl-0">
           <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">編集</div>
           <div className="text-[12px] text-text-sec mt-[3px] font-jp">{progression.title}</div>
         </div>
@@ -106,19 +106,19 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="flex flex-col h-full gap-4">
       {/* ヘッダー */}
-      <div className="flex items-start justify-between flex-shrink-0">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between flex-shrink-0 pl-[52px] md:pl-0 gap-3">
+        <div className="min-w-0">
           <div className="mb-2">
             <span className="text-[11px] font-jp px-[11px] py-[3px] rounded-full border border-accent/40 text-accent bg-accent-bg">
               コード進行
             </span>
           </div>
-          <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">{progression.title}</div>
+          <div className="text-[20px] font-bold tracking-[-0.01em] font-jp break-words">{progression.title}</div>
           <div className="text-[12px] text-text-sec mt-[3px] font-mono">
             {formatDate(progression.createdAt)} 作成 ・ {formatDate(progression.updatedAt)} 更新
           </div>
         </div>
-        <div className="flex gap-[9px]">
+        <div className="flex gap-[9px] flex-wrap">
           <button
             onClick={startEdit}
             className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-surface2 border border-border text-text-sec hover:text-text-pri hover:bg-surface3 transition-colors"
@@ -169,10 +169,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
       </div>
 
       {/* 下段: メタ情報 + ステッパー */}
-      <div
-        className="grid gap-4 flex-1 min-h-0"
-        style={{ gridTemplateColumns: '360px 1fr', alignItems: 'stretch' }}
-      >
+      <div className="grid gap-4 flex-1 min-h-0 grid-cols-1 md:[grid-template-columns:360px_1fr] md:items-stretch">
         {/* メタ情報 */}
         <div className="bg-surface border border-border rounded-[14px] p-[18px_20px] flex flex-col gap-4">
           <div>
