@@ -3,9 +3,17 @@
 import { use, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProgressions } from '@/hooks/useProgressions'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { getChordNotes, getChordRoot } from '@/lib/music/chord'
 import { getNotesOnFretboard } from '@/lib/music/fretboard'
-import { DEFAULT_FRET_START, DEFAULT_FRET_WIDTH, SCALE_OPTIONS } from '@/lib/music/constants'
+import {
+  DEFAULT_FRET_START,
+  DEFAULT_FRET_WIDTH,
+  MOBILE_FRET_WIDTH,
+  MAX_FRET_START,
+  MOBILE_MAX_FRET_START,
+  SCALE_OPTIONS,
+} from '@/lib/music/constants'
 import Fretboard from '@/components/fretboard/Fretboard'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
 import ProgressionPlayer from '@/components/progression/ProgressionPlayer'
@@ -22,10 +30,16 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   const router = useRouter()
   const { progressions, remove, update } = useProgressions()
 
+  const isCompactFretboard = useIsMobile(1024)
+  const fretWidth = isCompactFretboard ? MOBILE_FRET_WIDTH : DEFAULT_FRET_WIDTH
+  const maxFretStart = isCompactFretboard ? MOBILE_MAX_FRET_START : MAX_FRET_START
+
   const [selectedChordIdx, setSelectedChordIdx] = useState(0)
   const [fretStart, setFretStart] = useState(DEFAULT_FRET_START)
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const clampedFretStart = Math.min(fretStart, maxFretStart)
 
   // 編集フォーム用state
   const [editTitle, setEditTitle] = useState('')
@@ -52,8 +66,8 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
 
   const fretboardNotes = useMemo(() => {
     if (chordNotes.length === 0) return []
-    return getNotesOnFretboard(chordNotes, chordRoot, fretStart, fretStart + DEFAULT_FRET_WIDTH)
-  }, [chordNotes, chordRoot, fretStart])
+    return getNotesOnFretboard(chordNotes, chordRoot, clampedFretStart, clampedFretStart + fretWidth)
+  }, [chordNotes, chordRoot, clampedFretStart, fretWidth])
 
   if (progressions.length > 0 && !progression) {
     router.replace('/progressions')
@@ -86,7 +100,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   if (isEditing) {
     return (
       <div className="flex flex-col h-full gap-4">
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 pl-[52px] md:pl-0">
           <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">編集</div>
           <div className="text-[12px] text-text-sec mt-[3px] font-jp">{progression.title}</div>
         </div>
@@ -106,19 +120,19 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="flex flex-col h-full gap-4">
       {/* ヘッダー */}
-      <div className="flex items-start justify-between flex-shrink-0">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between flex-shrink-0 pl-[52px] md:pl-0 gap-3">
+        <div className="min-w-0">
           <div className="mb-2">
             <span className="text-[11px] font-jp px-[11px] py-[3px] rounded-full border border-accent/40 text-accent bg-accent-bg">
               コード進行
             </span>
           </div>
-          <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">{progression.title}</div>
+          <div className="text-[20px] font-bold tracking-[-0.01em] font-jp break-words">{progression.title}</div>
           <div className="text-[12px] text-text-sec mt-[3px] font-mono">
             {formatDate(progression.createdAt)} 作成 ・ {formatDate(progression.updatedAt)} 更新
           </div>
         </div>
-        <div className="flex gap-[9px]">
+        <div className="flex gap-[9px] flex-wrap">
           <button
             onClick={startEdit}
             className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-surface2 border border-border text-text-sec hover:text-text-pri hover:bg-surface3 transition-colors"
@@ -161,18 +175,15 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
           </span>
         </div>
         <div className="overflow-x-auto">
-          <Fretboard scaleNotes={chordNotes} rootNote={chordRoot} fretStart={fretStart} />
+          <Fretboard scaleNotes={chordNotes} rootNote={chordRoot} fretStart={clampedFretStart} fretWidth={fretWidth} />
         </div>
         <div className="mt-[10px]">
-          <FretRangeSlider value={fretStart} onChange={setFretStart} />
+          <FretRangeSlider value={clampedFretStart} onChange={setFretStart} max={maxFretStart} />
         </div>
       </div>
 
       {/* 下段: メタ情報 + ステッパー */}
-      <div
-        className="grid gap-4 flex-1 min-h-0"
-        style={{ gridTemplateColumns: '360px 1fr', alignItems: 'stretch' }}
-      >
+      <div className="grid gap-4 flex-1 min-h-0 grid-cols-1 md:[grid-template-columns:360px_1fr] md:items-stretch">
         {/* メタ情報 */}
         <div className="bg-surface border border-border rounded-[14px] p-[18px_20px] flex flex-col gap-4">
           <div>

@@ -4,15 +4,26 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProgressions } from '@/hooks/useProgressions'
 import { useScale } from '@/hooks/useScale'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import ProgressionEditor from '@/components/progression/ProgressionEditor'
 import Fretboard from '@/components/fretboard/Fretboard'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
+import {
+  DEFAULT_FRET_WIDTH,
+  MOBILE_FRET_WIDTH,
+  MAX_FRET_START,
+  MOBILE_MAX_FRET_START,
+} from '@/lib/music/constants'
 import type { NotePC, ScaleName, ChordName } from '@/types/music'
 
 export default function NewProgressionPage() {
   const router = useRouter()
   const { save } = useProgressions()
   const { scaleNotes, fretStart, setFretStart } = useScale()
+  const isCompactFretboard = useIsMobile(1024)
+  const fretWidth = isCompactFretboard ? MOBILE_FRET_WIDTH : DEFAULT_FRET_WIDTH
+  const maxFretStart = isCompactFretboard ? MOBILE_MAX_FRET_START : MAX_FRET_START
+  const clampedFretStart = Math.min(fretStart, maxFretStart)
 
   const [title, setTitle] = useState('')
   const [keyNote, setKeyNote] = useState<NotePC>('C')
@@ -32,12 +43,12 @@ export default function NewProgressionPage() {
 
   return (
     <div className="flex flex-col h-full gap-4">
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 pl-[52px] md:pl-0">
         <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">新規作成</div>
         <div className="text-[12px] text-text-sec mt-[3px] font-jp">コード進行を登録</div>
       </div>
 
-      <div className="grid gap-4 flex-1 min-h-0" style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'start' }}>
+      <div className="grid gap-4 flex-1 min-h-0 grid-cols-1 lg:grid-cols-2 lg:items-start">
         {/* 左: フォーム */}
         <ProgressionEditor
           title={title} onTitleChange={setTitle}
@@ -59,10 +70,10 @@ export default function NewProgressionPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <Fretboard scaleNotes={scaleNotes} rootNote={keyNote} fretStart={fretStart} />
+            <Fretboard scaleNotes={scaleNotes} rootNote={keyNote} fretStart={clampedFretStart} fretWidth={fretWidth} />
           </div>
 
-          <FretRangeSlider value={fretStart} onChange={setFretStart} />
+          <FretRangeSlider value={clampedFretStart} onChange={setFretStart} max={maxFretStart} />
 
           {chords.length > 0 && (
             <div className="flex gap-2 flex-wrap pt-2 border-t border-border">
