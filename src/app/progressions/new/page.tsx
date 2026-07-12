@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProgressions } from '@/hooks/useProgressions'
-import { useScale } from '@/hooks/useScale'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { getScaleNotes } from '@/lib/music/scale'
+import { getChordNotes, getChordRoot } from '@/lib/music/chord'
 import ProgressionEditor from '@/components/progression/ProgressionEditor'
 import Fretboard from '@/components/fretboard/Fretboard'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
 import {
+  DEFAULT_FRET_START,
   DEFAULT_FRET_WIDTH,
   MOBILE_FRET_WIDTH,
   MAX_FRET_START,
@@ -19,11 +21,9 @@ import type { NotePC, ScaleName, ChordName } from '@/types/music'
 export default function NewProgressionPage() {
   const router = useRouter()
   const { save } = useProgressions()
-  const { scaleNotes, fretStart, setFretStart } = useScale()
   const isCompactFretboard = useIsMobile(1024)
   const fretWidth = isCompactFretboard ? MOBILE_FRET_WIDTH : DEFAULT_FRET_WIDTH
   const maxFretStart = isCompactFretboard ? MOBILE_MAX_FRET_START : MAX_FRET_START
-  const clampedFretStart = Math.min(fretStart, maxFretStart)
 
   const [title, setTitle] = useState('')
   const [keyNote, setKeyNote] = useState<NotePC>('C')
@@ -31,6 +31,24 @@ export default function NewProgressionPage() {
   const [chords, setChords] = useState<ChordName[]>([])
   const [memo, setMemo] = useState('')
   const [selectedChordIdx, setSelectedChordIdx] = useState(0)
+  // プレビュー専用の開始フレット。ホーム画面の永続化された fretStart とは共有しない
+  const [fretStart, setFretStart] = useState(DEFAULT_FRET_START)
+  const clampedFretStart = Math.min(fretStart, maxFretStart)
+
+  const scaleNotes = useMemo(() => getScaleNotes(keyNote, scaleName), [keyNote, scaleName])
+
+  // エディター側でコードが削除されると selectedChordIdx が範囲外になりうるためクランプ
+  const safeChordIdx = Math.min(selectedChordIdx, chords.length - 1)
+  const selectedChord = safeChordIdx >= 0 ? chords[safeChordIdx] : null
+  const chordNotes = useMemo(
+    () => (selectedChord ? getChordNotes(selectedChord) : []),
+    [selectedChord],
+  )
+
+  // コード選択中はコード構成音、未登録・無効コード名の場合はスケール構成音を表示
+  const showChord = selectedChord !== null && chordNotes.length > 0
+  const previewNotes = showChord ? chordNotes : scaleNotes
+  const previewRoot = showChord ? (getChordRoot(selectedChord) as NotePC) : keyNote
 
   function handleSave() {
     save({ title, key: keyNote, scale: scaleName, chords, memo })
@@ -64,13 +82,15 @@ export default function NewProgressionPage() {
         <div className="bg-surface border border-border rounded-[14px] p-[22px] flex flex-col gap-4">
           <div className="text-[12px] text-text-sec font-medium font-jp">
             プレビュー
-            <span className="text-text-mut font-normal ml-2">
-              {keyNote} {scaleName}
+            <span className="text-text-mut font-normal ml-2 font-mono">
+              {showChord
+                ? `${selectedChord} の構成音 (${chordNotes.join(', ')})`
+                : `${keyNote} ${scaleName}`}
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <Fretboard scaleNotes={scaleNotes} rootNote={keyNote} fretStart={clampedFretStart} fretWidth={fretWidth} />
+            <Fretboard scaleNotes={previewNotes} rootNote={previewRoot} fretStart={clampedFretStart} fretWidth={fretWidth} />
           </div>
 
           <FretRangeSlider value={clampedFretStart} onChange={setFretStart} max={maxFretStart} />
@@ -83,7 +103,7 @@ export default function NewProgressionPage() {
                   onClick={() => setSelectedChordIdx(i)}
                   className={[
                     'font-mono text-[13px] font-semibold px-[16px] py-[8px] rounded-[11px] border-[1.5px] transition-all duration-[130ms]',
-                    i === selectedChordIdx
+                    i === safeChordIdx
                       ? 'bg-root-bg border-root text-root'
                       : 'bg-surface2 border-transparent text-text-sec hover:text-text-pri',
                   ].join(' ')}
