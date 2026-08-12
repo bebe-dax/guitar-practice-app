@@ -1,0 +1,19 @@
+# backend/src/main/resources/application.yml（新規作成）
+# DB接続情報は docker-compose.yml の POSTGRES_DB/USER/PASSWORD と一致させる
+spring:
+  application:
+    name: api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${DB_NAME:guitar_practice}
+    username: ${DB_USER:guitar_practice}
+    password: ${DB_PASSWORD:guitar_practice}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
