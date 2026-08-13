@@ -13,3 +13,6 @@
 # VSCode: settings.json はマシン固有の絶対パス（JDKパス等）を含むため非管理
 # extensions.json はマシン非依存のため管理対象
 .vscode/settings.json
+
+# curl動作確認用のCookie jar（実際のJWTを含むため非管理）
+cookie.txt
