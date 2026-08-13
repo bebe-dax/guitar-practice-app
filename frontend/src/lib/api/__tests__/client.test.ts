@@ -42,13 +42,17 @@ describe('apiFetch', () => {
     expect(init.headers['Content-Type']).toBe('application/json')
   })
 
-  it('XSRF-TOKEN Cookieが無ければヘッダーを付けない', async () => {
+  it('XSRF-TOKEN Cookieが無い場合、先にプライミングGETしてから送信し、それでも無ければヘッダーを付けない', async () => {
     stubDocumentCookie('')
     const fetchMock = stubFetch({ ok: true, status: 204 })
 
     await apiFetch('/api/auth/logout', { method: 'POST' })
 
-    const [, init] = fetchMock.mock.calls[0]
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    const [primingUrl] = fetchMock.mock.calls[0]
+    expect(primingUrl).toContain('/api/auth/me')
+
+    const [, init] = fetchMock.mock.calls[1]
     expect(init.headers['X-XSRF-TOKEN']).toBeUndefined()
   })
 

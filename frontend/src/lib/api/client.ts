@@ -14,6 +14,17 @@ function getCookie(name: string): string | null {
   return match ? decodeURIComponent(match[1]) : null
 }
 
+// XSRF-TOKEN Cookieは、認証チェック等の先行GETが完了する前に更新系リクエストが
+// 発生すると未セットのままになりうる（タイミング依存のレースコンディション）。
+// 無ければ軽いGETで先に取得してから読み直すことで、確実に存在させる。
+async function ensureXsrfToken(): Promise<string | null> {
+  const existing = getCookie('XSRF-TOKEN')
+  if (existing) return existing
+
+  await fetch(`${API_BASE_URL}/api/auth/me`, { credentials: 'include' })
+  return getCookie('XSRF-TOKEN')
+}
+
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body?: unknown
@@ -30,7 +41,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     headers['Content-Type'] = 'application/json'
   }
   if (method !== 'GET') {
-    const xsrfToken = getCookie('XSRF-TOKEN')
+    const xsrfToken = await ensureXsrfToken()
     if (xsrfToken) {
       headers['X-XSRF-TOKEN'] = xsrfToken
     }

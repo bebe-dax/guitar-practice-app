@@ -31,6 +31,7 @@ export default function NewProgressionPage() {
   const [chords, setChords] = useState<ChordName[]>([])
   const [memo, setMemo] = useState('')
   const [selectedChordIdx, setSelectedChordIdx] = useState(0)
+  const [saveError, setSaveError] = useState<string | null>(null)
   // プレビュー専用の開始フレット。ホーム画面の永続化された fretStart とは共有しない
   const [fretStart, setFretStart] = useState(DEFAULT_FRET_START)
   const clampedFretStart = Math.min(fretStart, maxFretStart)
@@ -50,9 +51,14 @@ export default function NewProgressionPage() {
   const previewNotes = showChord ? chordNotes : scaleNotes
   const previewRoot = showChord ? (getChordRoot(selectedChord) as NotePC) : keyNote
 
-  function handleSave() {
-    save({ title, key: keyNote, scale: scaleName, chords, memo })
-    router.push('/progressions')
+  async function handleSave() {
+    setSaveError(null)
+    try {
+      await save({ title, key: keyNote, scale: scaleName, chords, memo })
+      router.push('/progressions')
+    } catch {
+      setSaveError('保存に失敗しました')
+    }
   }
 
   function handleCancel() {
@@ -64,6 +70,7 @@ export default function NewProgressionPage() {
       <div className="flex-shrink-0 pl-[52px] md:pl-0">
         <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">新規作成</div>
         <div className="text-[12px] text-text-sec mt-[3px] font-jp">コード進行を登録</div>
+        {saveError && <div className="text-[12px] text-dim font-jp mt-1">{saveError}</div>}
       </div>
 
       <div className="grid gap-4 flex-1 min-h-0 grid-cols-1 lg:grid-cols-2 lg:items-start">

@@ -1,70 +1,46 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Progression } from '@/types/progression'
+import { listProgressions, createProgression, updateProgression, deleteProgression } from '@/lib/api/progressions'
 
-const STORAGE_KEY = 'guitar-app:progressions'
-
-type StorageSchema = {
-  version: 1
-  progressions: Progression[]
-}
-
-function loadFromStorage(): Progression[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
-    const schema = JSON.parse(raw) as StorageSchema
-    if (schema.version !== 1) return []
-    return schema.progressions
-  } catch {
-    return []
-  }
-}
-
-function persistToStorage(progressions: Progression[]): void {
-  const schema: StorageSchema = { version: 1, progressions }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(schema))
-}
+type ProgressionInput = Omit<Progression, 'id' | 'createdAt' | 'updatedAt'>
 
 export function useProgressions() {
   const [progressions, setProgressions] = useState<Progression[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    setProgressions(loadFromStorage())
+  const refresh = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await listProgressions()
+      setProgressions(data)
+    } catch {
+      setError('コード進行の取得に失敗しました')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  function save(data: Omit<Progression, 'id' | 'createdAt' | 'updatedAt'>): Progression {
-    const now = new Date().toISOString()
-    const progression: Progression = {
-      ...data,
-      id: crypto.randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    }
-    setProgressions(prev => {
-      const next = [...prev, progression]
-      persistToStorage(next)
-      return next
-    })
+  useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  async function save(data: ProgressionInput): Promise<Progression> {
+    const progression = await createProgression(data)
+    setProgressions(prev => [progression, ...prev])
     return progression
   }
 
-  function remove(id: string): void {
-    setProgressions(prev => {
-      const next = prev.filter(p => p.id !== id)
-      persistToStorage(next)
-      return next
-    })
+  async function remove(id: string): Promise<void> {
+    await deleteProgression(id)
+    setProgressions(prev => prev.filter(p => p.id !== id))
   }
 
-  function update(id: string, patch: Partial<Omit<Progression, 'id' | 'createdAt'>>): void {
-    setProgressions(prev => {
-      const next = prev.map(p =>
-        p.id === id ? { ...p, ...patch, updatedAt: new Date().toISOString() } : p
-      )
-      persistToStorage(next)
-      return next
-    })
+  async function update(id: string, data: ProgressionInput): Promise<void> {
+    const updated = await updateProgression(id, data)
+    setProgressions(prev => prev.map(p => (p.id === id ? updated : p)))
   }
 
-  return { progressions, save, remove, update }
+  return { progressions, loading, error, save, remove, update }
 }
