@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { User } from '@/types/auth'
 
 const NAV_ITEMS = [
   { href: '/', icon: '◉', label: 'スケール & 指板' },
@@ -12,7 +13,12 @@ const NAV_ITEMS = [
 
 const MOBILE_BREAKPOINT = 768 // px (= Tailwind md)
 
-export default function Sidebar() {
+type Props = {
+  user: User
+  onLogout: () => void
+}
+
+export default function Sidebar({ user, onLogout }: Props) {
   const pathname = usePathname()
   // mobile: ドロワーの開閉、desktop: ワイド/ナロー の開閉、共通の boolean
   const [open, setOpen] = useState(true)
@@ -117,6 +123,33 @@ export default function Sidebar() {
         })}
 
         <div className="flex-1" />
+
+        {/* 認証状態 */}
+        <div className="px-[6px] pb-2 border-t border-border pt-3">
+          <div className="flex flex-col gap-[6px]">
+            <div
+              className={`text-[11px] text-text-mut truncate whitespace-nowrap px-[11px] transition-opacity duration-150 ${
+                isMobile || open ? 'opacity-100' : 'opacity-0'
+              }`}
+              title={user.email}
+            >
+              {user.email}
+            </div>
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-3 px-[11px] py-[10px] rounded-[9px] text-sm border border-transparent text-text-sec hover:bg-surface2 hover:text-text-pri whitespace-nowrap overflow-hidden transition-all duration-150 font-jp"
+            >
+              <span className="text-[15px] w-5 text-center flex-shrink-0 font-ui">⎋</span>
+              <span
+                className={`transition-opacity duration-150 ${
+                  isMobile || open ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                ログアウト
+              </span>
+            </button>
+          </div>
+        </div>
 
         {/* バージョン */}
         <span
