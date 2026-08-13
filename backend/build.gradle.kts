@@ -30,6 +30,8 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-security-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+	// @AutoConfigureMockMvc 等の汎用テストオートコンフィグ（機能別スターターには含まれない）
+	testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")

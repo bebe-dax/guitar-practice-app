@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, JetBrains_Mono, Zen_Kaku_Gothic_New } from "next/font/google";
-import Sidebar from "@/components/layout/Sidebar";
+import AppShell from "@/components/layout/AppShell";
+import { AuthProvider } from "@/hooks/useAuth";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -41,10 +42,9 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${zenKakuGothicNew.variable} h-full antialiased`}
     >
       <body className="flex h-full overflow-hidden bg-bg text-text-pri font-ui">
-        <Sidebar />
-        <main className="flex-1 min-w-0 h-screen overflow-y-auto p-[18px_16px_22px] md:p-[22px_32px_28px]">
-          {children}
-        </main>
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   );
