@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useState, useMemo } from 'react'
+import { use, useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProgressions } from '@/hooks/useProgressions'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -28,7 +28,7 @@ function formatDate(iso: string): string {
 export default function ProgressionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
-  const { progressions, remove, update } = useProgressions()
+  const { progressions, loading, remove, update } = useProgressions()
 
   const isCompactFretboard = useIsMobile(1024)
   const fretWidth = isCompactFretboard ? MOBILE_FRET_WIDTH : DEFAULT_FRET_WIDTH
@@ -38,6 +38,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   const [fretStart, setFretStart] = useState(DEFAULT_FRET_START)
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const clampedFretStart = Math.min(fretStart, maxFretStart)
 
@@ -69,12 +70,13 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
     return getNotesOnFretboard(chordNotes, chordRoot, clampedFretStart, clampedFretStart + fretWidth)
   }, [chordNotes, chordRoot, clampedFretStart, fretWidth])
 
-  if (progressions.length > 0 && !progression) {
-    router.replace('/progressions')
-    return null
-  }
+  useEffect(() => {
+    if (!loading && !progression) {
+      router.replace('/progressions')
+    }
+  }, [loading, progression, router])
 
-  if (!progression) return null
+  if (loading || !progression) return null
 
   const scaleLabel = SCALE_OPTIONS.find(o => o.value === progression.scale)?.label ?? progression.scale
 
@@ -87,14 +89,24 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
     setIsEditing(true)
   }
 
-  function handleUpdate() {
-    update(id, { title: editTitle, key: editKey, scale: editScale, chords: editChords, memo: editMemo })
-    setIsEditing(false)
+  async function handleUpdate() {
+    setSaveError(null)
+    try {
+      await update(id, { title: editTitle, key: editKey, scale: editScale, chords: editChords, memo: editMemo })
+      setIsEditing(false)
+    } catch {
+      setSaveError('更新に失敗しました')
+    }
   }
 
-  function handleDelete() {
-    remove(id)
-    router.push('/progressions')
+  async function handleDelete() {
+    setSaveError(null)
+    try {
+      await remove(id)
+      router.push('/progressions')
+    } catch {
+      setSaveError('削除に失敗しました')
+    }
   }
 
   if (isEditing) {
@@ -103,6 +115,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
         <div className="flex-shrink-0 pl-[52px] md:pl-0">
           <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">編集</div>
           <div className="text-[12px] text-text-sec mt-[3px] font-jp">{progression.title}</div>
+          {saveError && <div className="text-[12px] text-dim font-jp mt-1">{saveError}</div>}
         </div>
         <ProgressionEditor
           title={editTitle} onTitleChange={setEditTitle}
@@ -131,6 +144,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
           <div className="text-[12px] text-text-sec mt-[3px] font-mono">
             {formatDate(progression.createdAt)} 作成 ・ {formatDate(progression.updatedAt)} 更新
           </div>
+          {saveError && <div className="text-[12px] text-dim font-jp mt-1">{saveError}</div>}
         </div>
         <div className="flex gap-[9px] flex-wrap">
           <button

@@ -6,7 +6,7 @@ import { useProgressions } from '@/hooks/useProgressions'
 import ProgressionCard from '@/components/progression/ProgressionCard'
 
 export default function ProgressionsPage() {
-  const { progressions } = useProgressions()
+  const { progressions, loading, error } = useProgressions()
   const [search, setSearch] = useState('')
 
   const filtered = progressions.filter(p =>
@@ -38,7 +38,15 @@ export default function ProgressionsPage() {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center text-text-mut">
+          <div className="text-[13px] font-jp">読み込み中...</div>
+        </div>
+      ) : error ? (
+        <div className="flex-1 flex items-center justify-center text-dim">
+          <div className="text-[13px] font-jp">{error}</div>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-text-mut">
           <div className="text-[40px]">♩</div>
           <div className="text-[14px] font-jp">
