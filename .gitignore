@@ -16,3 +16,6 @@
 
 # curl動作確認用のCookie jar（実際のJWTを含むため非管理）
 cookie.txt
+
+# 個人用の実装ナレッジメモ（非公開、git管理対象外）
+docs/auth-implementation-notes.md
