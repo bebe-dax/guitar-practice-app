@@ -1,0 +1,15 @@
+# docker-compose.yml（リポジトリルート、開発用 PostgreSQL）
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${DB_NAME:-guitar_practice}
+      POSTGRES_USER: ${DB_USER:-guitar_practice}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-guitar_practice}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
