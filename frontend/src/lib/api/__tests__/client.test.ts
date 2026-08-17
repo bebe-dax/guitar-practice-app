@@ -22,9 +22,9 @@ describe('apiFetch', () => {
 
   it('GETリクエストにはX-XSRF-TOKENヘッダーを付けない', async () => {
     stubDocumentCookie('XSRF-TOKEN=abc123')
-    const fetchMock = stubFetch({ ok: true, status: 200, body: { id: '1', email: 'a@example.com' } })
+    const fetchMock = stubFetch({ ok: true, status: 200, body: [] })
 
-    await apiFetch('/api/auth/me')
+    await apiFetch('/api/progressions')
 
     const [, init] = fetchMock.mock.calls[0]
     expect(init.headers['X-XSRF-TOKEN']).toBeUndefined()
@@ -33,26 +33,23 @@ describe('apiFetch', () => {
 
   it('POSTリクエストにはCookieのXSRF-TOKENをX-XSRF-TOKENヘッダーに載せる', async () => {
     stubDocumentCookie('other=1; XSRF-TOKEN=abc123; another=2')
-    const fetchMock = stubFetch({ ok: true, status: 200, body: { id: '1', email: 'a@example.com' } })
+    const fetchMock = stubFetch({ ok: true, status: 200, body: { id: '1' } })
 
-    await apiFetch('/api/auth/login', { method: 'POST', body: { email: 'a@example.com', password: 'x' } })
+    await apiFetch('/api/progressions', { method: 'POST', body: { title: 'test' } })
 
     const [, init] = fetchMock.mock.calls[0]
     expect(init.headers['X-XSRF-TOKEN']).toBe('abc123')
     expect(init.headers['Content-Type']).toBe('application/json')
   })
 
-  it('XSRF-TOKEN Cookieが無い場合、先にプライミングGETしてから送信し、それでも無ければヘッダーを付けない', async () => {
+  it('XSRF-TOKEN Cookieが無い場合はヘッダーを付けない', async () => {
     stubDocumentCookie('')
     const fetchMock = stubFetch({ ok: true, status: 204 })
 
-    await apiFetch('/api/auth/logout', { method: 'POST' })
+    await apiFetch('/api/progressions/1', { method: 'DELETE' })
 
-    expect(fetchMock).toHaveBeenCalledTimes(2)
-    const [primingUrl] = fetchMock.mock.calls[0]
-    expect(primingUrl).toContain('/api/auth/me')
-
-    const [, init] = fetchMock.mock.calls[1]
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [, init] = fetchMock.mock.calls[0]
     expect(init.headers['X-XSRF-TOKEN']).toBeUndefined()
   })
 
@@ -60,21 +57,21 @@ describe('apiFetch', () => {
     stubDocumentCookie('')
     stubFetch({ ok: true, status: 204 })
 
-    const result = await apiFetch('/api/auth/logout', { method: 'POST' })
+    const result = await apiFetch('/api/progressions/1', { method: 'DELETE' })
 
     expect(result).toBeUndefined()
   })
 
   it('エラー時はProblemDetailのdetailを使ってApiErrorを投げる', async () => {
     stubDocumentCookie('')
-    stubFetch({ ok: false, status: 409, body: { detail: 'このメールアドレスは既に登録されています' } })
+    stubFetch({ ok: false, status: 409, body: { detail: 'タイトルは必須です' } })
 
-    const promise = apiFetch('/api/auth/register', { method: 'POST', body: {} })
+    const promise = apiFetch('/api/progressions', { method: 'POST', body: {} })
 
     await expect(promise).rejects.toBeInstanceOf(ApiError)
     await expect(promise).rejects.toMatchObject({
       status: 409,
-      message: 'このメールアドレスは既に登録されています',
+      message: 'タイトルは必須です',
     })
   })
 
@@ -89,7 +86,7 @@ describe('apiFetch', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    await expect(apiFetch('/api/auth/me')).rejects.toMatchObject({
+    await expect(apiFetch('/api/progressions')).rejects.toMatchObject({
       status: 401,
       message: 'リクエストに失敗しました',
     })
