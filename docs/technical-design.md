@@ -1,8 +1,8 @@
 # ギター練習支援アプリ 技術設計書
 
-**バージョン**: 1.2  
+**バージョン**: 1.3  
 **作成日**: 2026-05-31  
-**更新日**: 2026-06-12  
+**更新日**: 2026-08-18  
 **ステータス**: ドラフト
 
 ---
@@ -14,6 +14,7 @@
 | 1.0 | 2026-05-31 | 初版作成 |
 | 1.1 | 2026-06-12 | 要件定義書v1.2との同期: 指板12フレット表示 / サイドバーレイアウト / デザイントークン追加 / UIモック準拠のコンポーネント構成に更新 |
 | 1.2 | 2026-08-10 | クラウド永続化・認証の方針を Firebase から自作 Java API (Spring Boot + PostgreSQL) へ変更 / モノレポ構成（frontend・backend）に更新。詳細は backend-mvp-spec.md |
+| 1.3 | 2026-08-18 | クラウド永続化・認証の方針を自作 Java API から Firebase（Firestore / Firebase Authentication）へ再度変更。自作バックエンド（backend/）は削除し、モノレポ構成を廃止 |
 
 ---
 
@@ -28,9 +29,8 @@
 | 音楽理論 | Tonal.js | 6.x |
 | 指板描画 | SVG（カスタム実装） | — |
 | データ永続化（Phase 1） | localStorage | — |
-| データ永続化（Phase 2+） | 自作 Java API (Spring Boot) + PostgreSQL | — |
-| 認証（Phase 2+） | 自作 Java API（JWT / httpOnly Cookie） | — |
-| バックエンド（Phase 2+） | Java / Spring Boot | 21 / 3.x |
+| データ永続化（Phase 2+） | Firebase Firestore | — |
+| 認証（Phase 2+） | Firebase Authentication（メール/パスワード） | — |
 | ホスティング | Vercel | — |
 | リポジトリ | GitHub（新規） | — |
 | パッケージマネージャー | npm | — |
@@ -39,11 +39,11 @@
 
 ## 2. ディレクトリ構成
 
-> Phase 2+ ではモノレポ構成とし、以下のフロントエンド一式は `frontend/` サブディレクトリに
-> 配置する。Java バックエンドは `backend/` に置く。分割の詳細は `backend-mvp-spec.md` §2.1 を参照。
+> 単一プロジェクト構成。Firebase設定ファイル
+> （`firebase.json` / `firestore.rules` / `firestore.indexes.json`）はリポジトリルートに置く。
 
 ```
-guitar-practice-app/ (= frontend/)
+guitar-practice-app/
 ├── public/
 │   └── favicon.ico
 ├── src/
@@ -283,7 +283,7 @@ type StorageSchema = {
 }
 ```
 
-バージョンフィールドを持たせておくことで、Phase 2+ でのサーバ DB（PostgreSQL）移行時にスキーマ変換が容易になる。
+バージョンフィールドを持たせておくことで、Phase 2+ での Firestore 移行時にスキーマ変換が容易になる。
 
 ---
 
@@ -333,14 +333,14 @@ export type Progression = {
 
 ### `/progressions`
 
-- `useProgressions` で localStorage から一覧取得
+- `useProgressions` で Firestore から一覧取得（ログインユーザーのデータのみ）
 - `ProgressionCard` を並べて表示
 - 各カードから詳細・削除が可能
 
 ### `/progressions/new`
 
 - `ProgressionEditor` でコード名を入力・追加・並び替え
-- 保存時に `useProgressions.save()` を呼び出して localStorage へ書き込み
+- 保存時に `useProgressions.save()` を呼び出して Firestore へ書き込み
 
 ### `/progressions/[id]`
 
@@ -353,13 +353,17 @@ export type Progression = {
 ## 6. 環境変数
 
 ```bash
-# frontend/.env.local（Phase 2+ から使用、Phase 1 では不要）
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080   # Java API のベース URL
+# .env.local（Phase 2+ から使用、Phase 1 では不要）
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
 ```
 
-Phase 1 では `.env.local` 自体不要。Phase 2+ の API 連携時に追加する。
-バックエンド側の設定（DB 接続情報・JWT シークレット等）は `backend/src/main/resources/application.yml`
-および環境変数で管理する（詳細は `backend-mvp-spec.md`）。
+Phase 1 では `.env.local` 自体不要。Phase 2+ のFirebase連携時に追加する（値は `.env.example` 参照）。
+Firestore Security Rules・複合インデックスはリポジトリルートの `firestore.rules` / `firestore.indexes.json` で管理する。
 
 ---
 
@@ -423,7 +427,7 @@ npm run dev
 |--------|---------|---------|
 | Phase 2 | スケール種類追加（Dorian 等） | `constants.ts` に追記のみ |
 | Phase 2 | モバイル・タブレット対応 | レイアウトのレスポンシブ化（指板の縦表示 or 横スクロール検討） |
-| Phase 2+ | サーバ DB 保存 | Java API 経由で PostgreSQL に永続化、`useProgressions` を fetch 化（`backend-mvp-spec.md`） |
-| Phase 2+ | ログイン | 自作 Java API の JWT/Cookie 認証、`app/layout.tsx` に AuthProvider 追加 |
+| Phase 2+ | クラウド保存 | Firestore SDKで永続化、`lib/api/progressions.ts` を直接アクセス化 |
+| Phase 2+ | ログイン | Firebase Authenticationのメール/パスワード認証、`app/layout.tsx` に AuthProvider 追加 |
 | Phase 3 | 共有 URL | Next.js の Dynamic Routes + サーバ側 ID をそのまま URL に使用 |
 | Phase 3 | 音声再生 | `lib/audio/` を新規追加、Web Audio API で実装 |
