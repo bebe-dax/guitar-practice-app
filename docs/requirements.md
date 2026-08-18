@@ -1,8 +1,8 @@
 # ギター練習支援アプリ 要件定義書
 
-**バージョン**: 1.3  
+**バージョン**: 1.4  
 **作成日**: 2026-05-31  
-**更新日**: 2026-06-12  
+**更新日**: 2026-08-18  
 **ステータス**: ドラフト
 
 ---
@@ -15,6 +15,7 @@
 | 1.1 | 2026-05-31 | F-07削除 / スケール方針確定 / 認証方針確定 / フェーズ構成更新 |
 | 1.2 | 2026-06-12 | UIモックアップ完成に伴う更新: デスクトップファースト方針 / 指板表示仕様の変更（F-05, F-08）/ UI仕様の追記（F-16〜F-18）/ 画面構成更新 |
 | 1.3 | 2026-08-10 | クラウド永続化・認証方針を Firebase から自作 Java API (Spring Boot + PostgreSQL / JWT・Cookie 認証) へ変更。詳細は backend-mvp-spec.md |
+| 1.4 | 2026-08-18 | クラウド永続化・認証方針を自作 Java API から Firebase（Firestore / Firebase Authentication）へ再度変更。自作バックエンド（Spring Boot + PostgreSQL）は廃止 |
 
 ---
 
@@ -184,8 +185,8 @@ type Phrase = {
 | 音楽理論ライブラリ | Tonal.js | スケール・コード・キー判別 API が充実 |
 | 指板描画 | SVG (カスタム実装) | コンパクトフレット表示に最適化しやすい |
 | データ永続化 Phase 1 | localStorage | ログイン不要・即時利用可能 |
-| データ永続化 Phase 2+ | 自作 Java API (Spring Boot) + PostgreSQL | 自作バックエンドでクラウド保存（ポートフォリオ目的） |
-| 認証 Phase 2+ | 自作 Java API（JWT / httpOnly Cookie） | Cookie 認証 + CSRF 対策。localStorage データを移行・紐付け |
+| データ永続化 Phase 2+ | Firebase Firestore | BaaSでクラウド保存。Security Rulesでユーザーごとにデータ分離 |
+| 認証 Phase 2+ | Firebase Authentication（メール/パスワード） | クライアントSDKで完結。localStorage データを移行・紐付け |
 | ホスティング | Vercel | Next.js 最適化済み |
 
 ---
@@ -209,9 +210,9 @@ type Phrase = {
 
 ### Phase 3 — 共有・クラウド
 
-- [ ] 自作 Java API（Spring Boot）によるユーザー認証（JWT / httpOnly Cookie）
-- [ ] コード進行のサーバ DB（PostgreSQL）永続化
-- [ ] localStorage → サーバ DB へのデータ移行・紐付け
+- [ ] Firebase Authentication（メール/パスワード）によるユーザー認証
+- [ ] コード進行の Firestore 永続化
+- [ ] localStorage → Firestore へのデータ移行・紐付け
 - [ ] 共有 URL 生成
 - [ ] キー判別機能（コード入力からキー推定）
 - [ ] 音声再生（Web Audio API によるコード進行の試聴）
@@ -222,7 +223,7 @@ type Phrase = {
 
 | # | 項目 | 内容 | ステータス |
 |---|------|------|-----------|
-| U-01 | 認証方針 | Phase 1 は localStorage で匿名保存。Phase 2+ で自作 Java API によるログイン（JWT / Cookie）+ データ移行 | **確定** |
+| U-01 | 認証方針 | Phase 1 は localStorage で匿名保存。Phase 2+ で Firebase Authentication によるログイン + データ移行 | **確定** |
 | U-02 | フレーズ入力形式 | 音名入力 / TAB 風入力 / MIDI 入力 のどれを優先するか | 未決定 |
 | U-03 | コード進行の再生機能 | Phase 1 では不要。Phase 3 以降で Web Audio API による実装を検討 | **確定** |
 | U-04 | スケール種類の範囲 | Phase 1 は基本5種＋ブルース。Phase 2 以降でモーダル等を拡張 | **確定** |

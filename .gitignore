@@ -2,13 +2,37 @@
 .DS_Store
 *.pem
 
-# env files
+# env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
-# dependencies (any workspace)
-**/node_modules/
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
 
-# frontend / backend build artifacts are ignored via their own .gitignore
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
 # VSCode: settings.json はマシン固有の絶対パス（JDKパス等）を含むため非管理
 # extensions.json はマシン非依存のため管理対象

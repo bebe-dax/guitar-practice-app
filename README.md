@@ -11,7 +11,8 @@
 | スタイリング | Tailwind CSS v4 |
 | 音楽理論 | Tonal.js |
 | 指板描画 | SVG（カスタム実装） |
-| データ永続化 | localStorage（Phase 1） |
+| データ永続化 | localStorage（Phase 1）/ Firebase Firestore（Phase 2+） |
+| 認証 | Firebase Authentication（メール/パスワード、Phase 2+） |
 | ホスティング | Vercel |
 
 ## 開発環境のセットアップ
