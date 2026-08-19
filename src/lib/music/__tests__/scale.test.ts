@@ -79,34 +79,15 @@ describe('getDiatonicChords', () => {
     ])
   })
 
-  it('C major pentatonic: スケール構成音に対応する 5 和音（IV と vii° を除外）', () => {
-    expect(getDiatonicChords('C', 'major pentatonic')).toEqual([
-      { chord: 'Cmaj7', degree: 'I' },
-      { chord: 'Dm7', degree: 'ii' },
-      { chord: 'Em7', degree: 'iii' },
-      { chord: 'G7', degree: 'V' },
-      { chord: 'Am7', degree: 'vi' },
-    ])
+  it('C major pentatonic: スケールに関わらず親キー(Cメジャー)の7和音', () => {
+    expect(getDiatonicChords('C', 'major pentatonic')).toEqual(getDiatonicChords('C', 'major'))
   })
 
-  it('A minor pentatonic: スケール構成音に対応する 5 和音（ii° と VI を除外）', () => {
-    expect(getDiatonicChords('A', 'minor pentatonic')).toEqual([
-      { chord: 'Am7', degree: 'i' },
-      { chord: 'Cmaj7', degree: 'III' },
-      { chord: 'Dm7', degree: 'iv' },
-      { chord: 'Em7', degree: 'v' },
-      { chord: 'G7', degree: 'VII' },
-    ])
+  it('A minor pentatonic: スケールに関わらず親キー(Aマイナー)の7和音', () => {
+    expect(getDiatonicChords('A', 'minor pentatonic')).toEqual(getDiatonicChords('A', 'minor'))
   })
 
-  it('A blues: minor pentatonic + ブルーノート Eb（度数 ♭v）', () => {
-    expect(getDiatonicChords('A', 'blues')).toEqual([
-      { chord: 'Am7', degree: 'i' },
-      { chord: 'Cmaj7', degree: 'III' },
-      { chord: 'Dm7', degree: 'iv' },
-      { chord: 'Eb', degree: '♭v' },
-      { chord: 'Em7', degree: 'v' },
-      { chord: 'G7', degree: 'VII' },
-    ])
+  it('A blues: スケールに関わらず親キー(Aマイナー)の7和音', () => {
+    expect(getDiatonicChords('A', 'blues')).toEqual(getDiatonicChords('A', 'minor'))
   })
 })

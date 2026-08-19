@@ -4,7 +4,7 @@ export type ScaleName = 'major' | 'minor' | 'major pentatonic' | 'minor pentaton
 export type ChordName = string     // 例: "Am7", "Cmaj7"
 
 // スケール度数つきダイアトニックコード（例: { chord: 'Cmaj7', degree: 'I' }）
-// pentatonic/blues のように 5〜6 個になるスケールでは、親キーの該当度数を継承する
+// キー（長調/短調）のみで決まり、常に7つ返る
 export type DiatonicChord = {
   chord: ChordName
   degree: string
