@@ -2,6 +2,7 @@
 
 import { useState, KeyboardEvent } from 'react'
 import ScaleSelector from '@/components/scale/ScaleSelector'
+import { isValidChordName } from '@/lib/music/chord'
 import type { NotePC, ScaleName, ChordName } from '@/types/music'
 
 const KEYS: NotePC[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
@@ -34,10 +35,16 @@ export default function ProgressionEditor({
   onSave, onCancel,
 }: Props) {
   const [chordInput, setChordInput] = useState('')
+  const [chordError, setChordError] = useState<string | null>(null)
 
   function addChord() {
     const trimmed = chordInput.trim()
     if (!trimmed) return
+    if (!isValidChordName(trimmed)) {
+      setChordError(`「${trimmed}」は無効なコード名です`)
+      return
+    }
+    setChordError(null)
     onChordsChange([...chords, trimmed])
     setChordInput('')
   }
@@ -108,12 +115,16 @@ export default function ProgressionEditor({
           <input
             type="text"
             value={chordInput}
-            onChange={e => setChordInput(e.target.value)}
+            onChange={e => {
+              setChordInput(e.target.value)
+              setChordError(null)
+            }}
             onKeyDown={handleChordKeyDown}
             placeholder="+ コード名"
             className="w-[110px] font-mono text-[13px] px-[12px] py-[9px] bg-surface2 border border-dashed border-border rounded-[9px] text-text-pri placeholder:text-text-mut outline-none focus:border-accent/60 transition-colors"
           />
         </div>
+        {chordError && <div className="text-[12px] text-dim font-jp">{chordError}</div>}
       </div>
 
       {/* メモ */}

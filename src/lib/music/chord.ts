@@ -16,6 +16,10 @@ export function getDiatonicChords(key: NotePC, scaleName: ScaleName): DiatonicCh
   return parentKey.chords.map((chord, i) => ({ chord, degree: degrees[i] }))
 }
 
+export function isValidChordName(chordName: ChordName): boolean {
+  return !Chord.get(chordName).empty
+}
+
 export function getChordNotes(chordName: ChordName): NotePC[] {
   const notes = Chord.get(chordName).notes
   return notes.length > 0 ? [...notes] : []
