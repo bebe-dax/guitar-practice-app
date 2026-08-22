@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getScaleNotes, getRelativeKey } from '../scale'
-import { getDiatonicChords } from '../chord'
+import { getDiatonicChords, isValidChordName } from '../chord'
 
 describe('getScaleNotes', () => {
   it('C major', () => {
@@ -89,5 +89,15 @@ describe('getDiatonicChords', () => {
 
   it('A blues: スケールに関わらず親キー(Aマイナー)の7和音', () => {
     expect(getDiatonicChords('A', 'blues')).toEqual(getDiatonicChords('A', 'minor'))
+  })
+})
+
+describe('isValidChordName', () => {
+  it.each(['Cmaj7', 'F#m7b5', 'Dm7', 'G7', 'C', 'Bb'])('%s は有効', (chord) => {
+    expect(isValidChordName(chord)).toBe(true)
+  })
+
+  it.each(['Xyz', '', 'あいうえお'])('%s は無効', (chord) => {
+    expect(isValidChordName(chord)).toBe(false)
   })
 })
