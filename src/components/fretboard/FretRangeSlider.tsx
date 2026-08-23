@@ -1,5 +1,6 @@
 'use client'
 
+import { useId } from 'react'
 import { MAX_FRET_START } from '@/lib/music/constants'
 
 type Props = {
@@ -9,10 +10,15 @@ type Props = {
 }
 
 export default function FretRangeSlider({ value, onChange, max = MAX_FRET_START }: Props) {
+  const inputId = useId()
+
   return (
     <div className="flex items-center gap-4">
-      <span className="text-sm text-text-sec font-jp whitespace-nowrap">開始フレット</span>
+      <label htmlFor={inputId} className="text-sm text-text-sec font-jp whitespace-nowrap">
+        開始フレット
+      </label>
       <input
+        id={inputId}
         type="range"
         min={0}
         max={max}
