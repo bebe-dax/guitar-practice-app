@@ -31,6 +31,7 @@ export default function ProgressionsPage() {
       <div className="flex gap-3 items-center flex-shrink-0">
         <input
           type="text"
+          aria-label="タイトル・コードで検索"
           placeholder="タイトル・コードで検索..."
           value={search}
           onChange={e => setSearch(e.target.value)}

@@ -18,10 +18,10 @@ export default function DiatonicChordList({ chords }: Props) {
           <div
             key={i}
             className={[
-              'rounded-[11px] py-[11px] px-1 text-center cursor-pointer transition-all duration-[120ms] flex flex-col gap-[5px] border min-w-0',
+              'rounded-[11px] py-[11px] px-1 text-center transition-all duration-[120ms] flex flex-col gap-[5px] border min-w-0',
               isRoot
                 ? 'bg-accent-bg border-accent/40'
-                : 'bg-surface2 border-transparent hover:bg-surface3',
+                : 'bg-surface2 border-transparent',
             ].join(' ')}
           >
             <div className={['text-[11px] font-mono', isDim ? 'text-dim' : 'text-text-mut'].join(' ')}>
