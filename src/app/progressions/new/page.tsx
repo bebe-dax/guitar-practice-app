@@ -15,6 +15,7 @@ import {
   MOBILE_FRET_WIDTH,
   MAX_FRET_START,
   MOBILE_MAX_FRET_START,
+  getScaleLabel,
 } from '@/lib/music/constants'
 import type { NotePC, ScaleName, ChordName } from '@/types/music'
 
@@ -92,7 +93,7 @@ export default function NewProgressionPage() {
             <span className="text-text-mut font-normal ml-2 font-mono">
               {showChord
                 ? `${selectedChord} の構成音 (${chordNotes.join(', ')})`
-                : `${keyNote} ${scaleName}`}
+                : `${keyNote} ${getScaleLabel(scaleName)}`}
             </span>
           </div>
 

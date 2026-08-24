@@ -21,3 +21,8 @@ export const SCALE_OPTIONS: { label: string; value: ScaleName }[] = [
   { label: 'Minor Pentatonic', value: 'minor pentatonic' },
   { label: 'Blues',            value: 'blues' },
 ]
+
+// スケール表示名は必ずこのヘルパー経由にし、ページごとに表記がばらつくのを防ぐ
+export function getScaleLabel(scaleName: ScaleName): string {
+  return SCALE_OPTIONS.find(o => o.value === scaleName)?.label ?? scaleName
+}

@@ -11,7 +11,7 @@ import {
   MOBILE_FRET_WIDTH,
   MAX_FRET_START,
   MOBILE_MAX_FRET_START,
-  SCALE_OPTIONS,
+  getScaleLabel,
 } from '@/lib/music/constants'
 import Fretboard from '@/components/fretboard/Fretboard'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
@@ -72,7 +72,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
 
   if (loading || !progression) return null
 
-  const scaleLabel = SCALE_OPTIONS.find(o => o.value === progression.scale)?.label ?? progression.scale
+  const scaleLabel = getScaleLabel(progression.scale)
 
   function startEdit() {
     setEditTitle(progression!.title)

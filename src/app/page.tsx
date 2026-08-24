@@ -14,7 +14,7 @@ import {
   MOBILE_FRET_WIDTH,
   MAX_FRET_START,
   MOBILE_MAX_FRET_START,
-  SCALE_OPTIONS,
+  getScaleLabel,
 } from '@/lib/music/constants'
 
 export default function Home() {
@@ -27,7 +27,7 @@ export default function Home() {
   // ビューポート切替時、保存済み fretStart が新しい上限を超えていれば表示用にクランプ
   const clampedFretStart = Math.min(fretStart, maxFretStart)
 
-  const scaleLabel = SCALE_OPTIONS.find(o => o.value === scaleName)?.label ?? scaleName
+  const scaleLabel = getScaleLabel(scaleName)
 
   return (
     <div className="flex flex-col h-full gap-4">
