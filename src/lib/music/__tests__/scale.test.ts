@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { getScaleNotes, getRelativeKey } from '../scale'
 import { getDiatonicChords, isValidChordName } from '../chord'
+import { getScaleLabel } from '../constants'
 
 describe('getScaleNotes', () => {
   it('C major', () => {
@@ -99,5 +100,15 @@ describe('isValidChordName', () => {
 
   it.each(['Xyz', '', 'あいうえお'])('%s は無効', (chord) => {
     expect(isValidChordName(chord)).toBe(false)
+  })
+})
+
+describe('getScaleLabel', () => {
+  it('SCALE_OPTIONSに定義されたラベルを返す', () => {
+    expect(getScaleLabel('major')).toBe('Major')
+    expect(getScaleLabel('minor')).toBe('Natural Minor')
+    expect(getScaleLabel('major pentatonic')).toBe('Major Pentatonic')
+    expect(getScaleLabel('minor pentatonic')).toBe('Minor Pentatonic')
+    expect(getScaleLabel('blues')).toBe('Blues')
   })
 })

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getScaleLabel } from '@/lib/music/constants'
 import type { Progression } from '@/types/progression'
 
 const ACCENT_COLORS = [
@@ -18,10 +19,6 @@ function formatDate(iso: string): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}/${m}/${day}`
-}
-
-function formatScale(scale: string): string {
-  return scale.replace(/\b\w/g, c => c.toUpperCase())
 }
 
 export default function ProgressionCard({ progression, index }: Props) {
@@ -55,7 +52,7 @@ export default function ProgressionCard({ progression, index }: Props) {
         </h3>
 
         <div className="text-[12px] text-text-sec font-mono mb-[12px]">
-          Key: {progression.key} / {formatScale(progression.scale)}
+          Key: {progression.key} / {getScaleLabel(progression.scale)}
         </div>
 
         <div className="flex gap-[6px] flex-wrap mb-[11px]">
