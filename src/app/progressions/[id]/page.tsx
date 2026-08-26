@@ -37,6 +37,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   const [fretStart, setFretStart] = useState(DEFAULT_FRET_START)
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
   const clampedFretStart = Math.min(fretStart, maxFretStart)
@@ -95,11 +96,13 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
 
   async function handleDelete() {
     setSaveError(null)
+    setDeleting(true)
     try {
       await remove(id)
       router.push('/progressions')
     } catch {
       setSaveError('削除に失敗しました')
+      setDeleting(false)
     }
   }
 
@@ -152,13 +155,15 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
               <span className="text-[12px] text-text-sec font-jp">本当に削除しますか？</span>
               <button
                 onClick={handleDelete}
-                className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-dim/20 border border-dim/40 text-dim hover:bg-dim/30 transition-colors"
+                disabled={deleting}
+                className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-dim/20 border border-dim/40 text-dim hover:bg-dim/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 削除する
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-surface2 border border-border text-text-sec hover:bg-surface3 transition-colors"
+                disabled={deleting}
+                className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-surface2 border border-border text-text-sec hover:bg-surface3 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 キャンセル
               </button>
