@@ -22,7 +22,7 @@ type Props = {
   scaleName: ScaleName; onScaleChange: (v: ScaleName) => void
   chords: ChordName[]; onChordsChange: (v: ChordName[]) => void
   memo: string; onMemoChange: (v: string) => void
-  onSave: () => void
+  onSave: () => Promise<void>
   onCancel: () => void
 }
 
@@ -36,6 +36,7 @@ export default function ProgressionEditor({
 }: Props) {
   const [chordInput, setChordInput] = useState('')
   const [chordError, setChordError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   function addChord() {
     const trimmed = chordInput.trim()
@@ -60,7 +61,16 @@ export default function ProgressionEditor({
     }
   }
 
-  const canSave = title.trim().length > 0 && chords.length > 0
+  const canSave = title.trim().length > 0 && chords.length > 0 && !submitting
+
+  async function handleSaveClick() {
+    setSubmitting(true)
+    try {
+      await onSave()
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="bg-surface border border-border rounded-[14px] p-[22px] flex flex-col gap-5">
@@ -148,7 +158,7 @@ export default function ProgressionEditor({
           キャンセル
         </button>
         <button
-          onClick={onSave}
+          onClick={handleSaveClick}
           disabled={!canSave}
           className="text-[13px] font-medium font-jp px-[16px] py-[9px] rounded-[9px] bg-accent text-bg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
         >
