@@ -64,6 +64,21 @@ describe('progressions APIクライアント(Firestore)', () => {
     ])
   })
 
+  it('listProgressions は不正な形式のドキュメントをスキップし、正常なものだけ返す', async () => {
+    mockGetDocs.mockResolvedValue({
+      docs: [
+        { id: 'ok', data: () => ({ ...input, createdAt: timestamp, updatedAt: timestamp }) },
+        // createdAtが文字列（Timestampではない）の不正なドキュメント
+        { id: 'broken', data: () => ({ ...input, createdAt: '2026-01-01', updatedAt: timestamp }) },
+      ],
+    })
+
+    const result = await listProgressions()
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('ok')
+  })
+
   it('createProgression はuserIdを付与して作成し、作成結果を返す', async () => {
     mockAddDoc.mockResolvedValue({ id: 'new-1' })
     mockGetDocFromServer.mockResolvedValue({
