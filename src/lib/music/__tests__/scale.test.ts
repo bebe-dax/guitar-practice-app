@@ -23,6 +23,22 @@ describe('getScaleNotes', () => {
   it('A blues', () => {
     expect(getScaleNotes('A', 'blues')).toEqual(['A', 'C', 'D', 'Eb', 'E', 'G'])
   })
+
+  it('C dorian', () => {
+    expect(getScaleNotes('C', 'dorian')).toEqual(['C', 'D', 'Eb', 'F', 'G', 'A', 'Bb'])
+  })
+
+  it('C mixolydian', () => {
+    expect(getScaleNotes('C', 'mixolydian')).toEqual(['C', 'D', 'E', 'F', 'G', 'A', 'Bb'])
+  })
+
+  it('C harmonic minor', () => {
+    expect(getScaleNotes('C', 'harmonic minor')).toEqual(['C', 'D', 'Eb', 'F', 'G', 'Ab', 'B'])
+  })
+
+  it('C melodic minor', () => {
+    expect(getScaleNotes('C', 'melodic minor')).toEqual(['C', 'D', 'Eb', 'F', 'G', 'A', 'B'])
+  })
 })
 
 describe('getRelativeKey', () => {
@@ -91,6 +107,22 @@ describe('getDiatonicChords', () => {
   it('A blues: スケールに関わらず親キー(Aマイナー)の7和音', () => {
     expect(getDiatonicChords('A', 'blues')).toEqual(getDiatonicChords('A', 'minor'))
   })
+
+  it('A dorian: スケールに関わらず親キー(Aマイナー)の7和音', () => {
+    expect(getDiatonicChords('A', 'dorian')).toEqual(getDiatonicChords('A', 'minor'))
+  })
+
+  it('A harmonic minor: スケールに関わらず親キー(Aマイナー)の7和音', () => {
+    expect(getDiatonicChords('A', 'harmonic minor')).toEqual(getDiatonicChords('A', 'minor'))
+  })
+
+  it('A melodic minor: スケールに関わらず親キー(Aマイナー)の7和音', () => {
+    expect(getDiatonicChords('A', 'melodic minor')).toEqual(getDiatonicChords('A', 'minor'))
+  })
+
+  it('C mixolydian: スケールに関わらず親キー(Cメジャー)の7和音', () => {
+    expect(getDiatonicChords('C', 'mixolydian')).toEqual(getDiatonicChords('C', 'major'))
+  })
 })
 
 describe('isValidChordName', () => {
@@ -114,5 +146,9 @@ describe('getScaleLabel', () => {
     expect(getScaleLabel('major pentatonic')).toBe('Major Pentatonic')
     expect(getScaleLabel('minor pentatonic')).toBe('Minor Pentatonic')
     expect(getScaleLabel('blues')).toBe('Blues')
+    expect(getScaleLabel('dorian')).toBe('Dorian')
+    expect(getScaleLabel('mixolydian')).toBe('Mixolydian')
+    expect(getScaleLabel('harmonic minor')).toBe('Harmonic Minor')
+    expect(getScaleLabel('melodic minor')).toBe('Melodic Minor')
   })
 })

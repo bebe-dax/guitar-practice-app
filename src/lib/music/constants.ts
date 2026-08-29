@@ -20,6 +20,10 @@ export const SCALE_OPTIONS: { label: string; value: ScaleName }[] = [
   { label: 'Major Pentatonic', value: 'major pentatonic' },
   { label: 'Minor Pentatonic', value: 'minor pentatonic' },
   { label: 'Blues',            value: 'blues' },
+  { label: 'Dorian',           value: 'dorian' },
+  { label: 'Mixolydian',       value: 'mixolydian' },
+  { label: 'Harmonic Minor',   value: 'harmonic minor' },
+  { label: 'Melodic Minor',    value: 'melodic minor' },
 ]
 
 // スケール表示名は必ずこのヘルパー経由にし、ページごとに表記がばらつくのを防ぐ
