@@ -101,6 +101,10 @@ describe('isValidChordName', () => {
   it.each(['Xyz', '', 'あいうえお'])('%s は無効', (chord) => {
     expect(isValidChordName(chord)).toBe(false)
   })
+
+  it.each(['m', '7', '9', 'sus4', 'dim', '5', 'maj7'])('ルート音なしの%sは無効', (chord) => {
+    expect(isValidChordName(chord)).toBe(false)
+  })
 })
 
 describe('getScaleLabel', () => {
