@@ -32,6 +32,7 @@ vi.mock('firebase/firestore', async () => {
 })
 
 const input = {
+  type: 'progression' as const,
   title: '王道進行',
   key: 'C' as const,
   scale: 'major' as const,
@@ -114,5 +115,38 @@ describe('progressions APIクライアント(Firestore)', () => {
     await deleteProgression('abc-123')
 
     expect(mockDeleteDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'abc-123' }))
+  })
+
+  it('listProgressions は type: "phrase" のドキュメントを notes フィールドで解釈する', async () => {
+    const phrase = {
+      type: 'phrase' as const,
+      title: 'イントロのリフ',
+      key: 'A' as const,
+      scale: 'minor' as const,
+      notes: ['A', 'C', 'E'],
+      memo: '',
+    }
+    mockGetDocs.mockResolvedValue({
+      docs: [{ id: 'phrase-1', data: () => ({ ...phrase, createdAt: timestamp, updatedAt: timestamp }) }],
+    })
+
+    const result = await listProgressions()
+
+    expect(result).toEqual([
+      { id: 'phrase-1', ...phrase, createdAt: timestamp.toDate().toISOString(), updatedAt: timestamp.toDate().toISOString() },
+    ])
+  })
+
+  it('listProgressions は type フィールドがない旧形式のドキュメントを progression として扱う（後方互換）', async () => {
+    const { type: _type, ...legacyInput } = input
+    mockGetDocs.mockResolvedValue({
+      docs: [{ id: 'legacy-1', data: () => ({ ...legacyInput, createdAt: timestamp, updatedAt: timestamp }) }],
+    })
+
+    const result = await listProgressions()
+
+    expect(result).toEqual([
+      { id: 'legacy-1', ...input, createdAt: timestamp.toDate().toISOString(), updatedAt: timestamp.toDate().toISOString() },
+    ])
   })
 })

@@ -1,15 +1,16 @@
 import Link from 'next/link'
 import { getScaleLabel } from '@/lib/music/constants'
-import type { Progression } from '@/types/progression'
+import type { ProgressionItem } from '@/types/progression'
 
-const ACCENT_COLORS = [
+const PROGRESSION_ACCENT_COLORS = [
   'var(--color-accent)',
   'var(--color-purple)',
-  'var(--color-amber)',
 ] as const
 
+const PHRASE_ACCENT_COLOR = 'var(--color-amber)'
+
 type Props = {
-  progression: Progression
+  progression: ProgressionItem
   index: number
 }
 
@@ -22,7 +23,11 @@ function formatDate(iso: string): string {
 }
 
 export default function ProgressionCard({ progression, index }: Props) {
-  const accentColor = ACCENT_COLORS[index % ACCENT_COLORS.length]
+  const isPhrase = progression.type === 'phrase'
+  const accentColor = isPhrase
+    ? PHRASE_ACCENT_COLOR
+    : PROGRESSION_ACCENT_COLORS[index % PROGRESSION_ACCENT_COLORS.length]
+  const tokens = isPhrase ? progression.notes : progression.chords
 
   return (
     <Link href={`/progressions/${progression.id}`}>
@@ -40,7 +45,7 @@ export default function ProgressionCard({ progression, index }: Props) {
               borderColor: `color-mix(in srgb, ${accentColor} 40%, transparent)`,
             }}
           >
-            コード進行
+            {isPhrase ? 'フレーズ' : 'コード進行'}
           </span>
           <span className="text-[11px] text-text-mut font-mono">
             {formatDate(progression.createdAt)}
@@ -56,12 +61,12 @@ export default function ProgressionCard({ progression, index }: Props) {
         </div>
 
         <div className="flex gap-[6px] flex-wrap mb-[11px]">
-          {progression.chords.map((chord, i) => (
+          {tokens.map((token, i) => (
             <span
               key={i}
               className="font-mono text-[12px] font-medium px-[11px] py-1 bg-surface2 rounded-full text-text-sec"
             >
-              {chord}
+              {token}
             </span>
           ))}
         </div>
