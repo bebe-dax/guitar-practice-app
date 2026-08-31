@@ -1,11 +1,15 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { Progression } from '@/types/progression'
-import { listProgressions, createProgression, updateProgression, deleteProgression } from '@/lib/api/progressions'
-
-type ProgressionInput = Omit<Progression, 'id' | 'createdAt' | 'updatedAt'>
+import type { ProgressionItem } from '@/types/progression'
+import {
+  listProgressions,
+  createProgression,
+  updateProgression,
+  deleteProgression,
+  type ProgressionItemInput,
+} from '@/lib/api/progressions'
 
 export function useProgressions() {
-  const [progressions, setProgressions] = useState<Progression[]>([])
+  const [progressions, setProgressions] = useState<ProgressionItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -16,7 +20,7 @@ export function useProgressions() {
       const data = await listProgressions()
       setProgressions(data)
     } catch {
-      setError('コード進行の取得に失敗しました')
+      setError('データの取得に失敗しました')
     } finally {
       setLoading(false)
     }
@@ -26,10 +30,10 @@ export function useProgressions() {
     refresh()
   }, [refresh])
 
-  async function save(data: ProgressionInput): Promise<Progression> {
-    const progression = await createProgression(data)
-    setProgressions(prev => [progression, ...prev])
-    return progression
+  async function save(data: ProgressionItemInput): Promise<ProgressionItem> {
+    const item = await createProgression(data)
+    setProgressions(prev => [item, ...prev])
+    return item
   }
 
   async function remove(id: string): Promise<void> {
@@ -37,7 +41,7 @@ export function useProgressions() {
     setProgressions(prev => prev.filter(p => p.id !== id))
   }
 
-  async function update(id: string, data: ProgressionInput): Promise<void> {
+  async function update(id: string, data: ProgressionItemInput): Promise<void> {
     const updated = await updateProgression(id, data)
     setProgressions(prev => prev.map(p => (p.id === id ? updated : p)))
   }

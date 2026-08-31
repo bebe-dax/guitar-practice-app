@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { getScaleNotes } from '@/lib/music/scale'
 import { getChordNotes, getChordRoot } from '@/lib/music/chord'
 import ProgressionEditor from '@/components/progression/ProgressionEditor'
+import PhraseEditor from '@/components/progression/PhraseEditor'
 import Fretboard from '@/components/fretboard/Fretboard'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
 import {
@@ -19,6 +20,13 @@ import {
 } from '@/lib/music/constants'
 import type { NotePC, ScaleName, ChordName } from '@/types/music'
 
+type ItemType = 'progression' | 'phrase'
+
+const TYPE_TABS: { label: string; value: ItemType }[] = [
+  { label: 'コード進行', value: 'progression' },
+  { label: 'フレーズ', value: 'phrase' },
+]
+
 export default function NewProgressionPage() {
   const router = useRouter()
   const { save } = useProgressions()
@@ -26,10 +34,12 @@ export default function NewProgressionPage() {
   const fretWidth = isCompactFretboard ? MOBILE_FRET_WIDTH : DEFAULT_FRET_WIDTH
   const maxFretStart = isCompactFretboard ? MOBILE_MAX_FRET_START : MAX_FRET_START
 
+  const [itemType, setItemType] = useState<ItemType>('progression')
   const [title, setTitle] = useState('')
   const [keyNote, setKeyNote] = useState<NotePC>('C')
   const [scaleName, setScaleName] = useState<ScaleName>('major')
   const [chords, setChords] = useState<ChordName[]>([])
+  const [notes, setNotes] = useState<NotePC[]>([])
   const [memo, setMemo] = useState('')
   const [selectedChordIdx, setSelectedChordIdx] = useState(0)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -47,15 +57,25 @@ export default function NewProgressionPage() {
     [selectedChord],
   )
 
-  // コード選択中はコード構成音、未登録・無効コード名の場合はスケール構成音を表示
-  const showChord = selectedChord !== null && chordNotes.length > 0
-  const previewNotes = showChord ? chordNotes : scaleNotes
-  const previewRoot = showChord ? (getChordRoot(selectedChord) as NotePC) : keyNote
+  // コード進行: コード選択中はコード構成音、未登録・無効コード名の場合はスケール構成音を表示
+  // フレーズ: 入力済みの音名をそのまま指板に表示
+  const showChord = itemType === 'progression' && selectedChord !== null && chordNotes.length > 0
+  const previewNotes = itemType === 'phrase' ? notes : (showChord ? chordNotes : scaleNotes)
+  const previewRoot = itemType === 'phrase' ? keyNote : (showChord ? (getChordRoot(selectedChord!) as NotePC) : keyNote)
+
+  function switchType(next: ItemType) {
+    setItemType(next)
+    setSaveError(null)
+  }
 
   async function handleSave() {
     setSaveError(null)
     try {
-      await save({ title, key: keyNote, scale: scaleName, chords, memo })
+      if (itemType === 'progression') {
+        await save({ type: 'progression', title, key: keyNote, scale: scaleName, chords, memo })
+      } else {
+        await save({ type: 'phrase', title, key: keyNote, scale: scaleName, notes, memo })
+      }
       router.push('/progressions')
     } catch {
       setSaveError('保存に失敗しました')
@@ -70,30 +90,63 @@ export default function NewProgressionPage() {
     <div className="flex flex-col h-full gap-4">
       <div className="flex-shrink-0 pl-[52px] md:pl-0">
         <div className="text-[20px] font-bold tracking-[-0.01em] font-jp">新規作成</div>
-        <div className="text-[12px] text-text-sec mt-[3px] font-jp">コード進行を登録</div>
+        <div className="text-[12px] text-text-sec mt-[3px] font-jp">
+          {itemType === 'phrase' ? 'フレーズを登録' : 'コード進行を登録'}
+        </div>
         {saveError && <div className="text-[12px] text-dim font-jp mt-1">{saveError}</div>}
+      </div>
+
+      <div className="flex gap-[6px] flex-shrink-0 pl-[52px] md:pl-0">
+        {TYPE_TABS.map(tab => (
+          <button
+            key={tab.value}
+            onClick={() => switchType(tab.value)}
+            className={[
+              'text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] transition-colors',
+              itemType === tab.value
+                ? 'bg-accent-bg border border-accent/40 text-accent'
+                : 'bg-surface border border-border text-text-sec hover:text-text-pri',
+            ].join(' ')}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <div className="grid gap-4 flex-1 min-h-0 grid-cols-1 lg:grid-cols-2 lg:items-start">
         {/* 左: フォーム */}
-        <ProgressionEditor
-          title={title} onTitleChange={setTitle}
-          keyNote={keyNote} onKeyChange={setKeyNote}
-          scaleName={scaleName} onScaleChange={setScaleName}
-          chords={chords} onChordsChange={setChords}
-          memo={memo} onMemoChange={setMemo}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
+        {itemType === 'progression' ? (
+          <ProgressionEditor
+            title={title} onTitleChange={setTitle}
+            keyNote={keyNote} onKeyChange={setKeyNote}
+            scaleName={scaleName} onScaleChange={setScaleName}
+            chords={chords} onChordsChange={setChords}
+            memo={memo} onMemoChange={setMemo}
+            onSave={handleSave}
+            onCancel={handleCancel}
+          />
+        ) : (
+          <PhraseEditor
+            title={title} onTitleChange={setTitle}
+            keyNote={keyNote} onKeyChange={setKeyNote}
+            scaleName={scaleName} onScaleChange={setScaleName}
+            notes={notes} onNotesChange={setNotes}
+            memo={memo} onMemoChange={setMemo}
+            onSave={handleSave}
+            onCancel={handleCancel}
+          />
+        )}
 
         {/* 右: プレビュー */}
         <div className="bg-surface border border-border rounded-[14px] p-[22px] flex flex-col gap-4">
           <div className="text-[12px] text-text-sec font-medium font-jp">
             プレビュー
             <span className="text-text-mut font-normal ml-2 font-mono">
-              {showChord
-                ? `${selectedChord} の構成音 (${chordNotes.join(', ')})`
-                : `${keyNote} ${getScaleLabel(scaleName)}`}
+              {itemType === 'phrase'
+                ? (notes.length > 0 ? `音名リスト (${notes.join(', ')})` : `${keyNote} ${getScaleLabel(scaleName)}`)
+                : (showChord
+                  ? `${selectedChord} の構成音 (${chordNotes.join(', ')})`
+                  : `${keyNote} ${getScaleLabel(scaleName)}`)}
             </span>
           </div>
 
@@ -103,7 +156,7 @@ export default function NewProgressionPage() {
 
           <FretRangeSlider value={clampedFretStart} onChange={setFretStart} max={maxFretStart} />
 
-          {chords.length > 0 && (
+          {itemType === 'progression' && chords.length > 0 && (
             <div className="flex gap-2 flex-wrap pt-2 border-t border-border">
               {chords.map((chord, i) => (
                 <button
