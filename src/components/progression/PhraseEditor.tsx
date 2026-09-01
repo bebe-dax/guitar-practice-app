@@ -61,9 +61,14 @@ export default function PhraseEditor({
     }
   }
 
-  const canSave = title.trim().length > 0 && notes.length > 0 && !submitting
+  const hasPendingNoteInput = noteInput.trim().length > 0
+  const canSave = title.trim().length > 0 && notes.length > 0 && !hasPendingNoteInput && !submitting
 
   async function handleSaveClick() {
+    if (hasPendingNoteInput) {
+      setNoteError('入力中の音名があります。Enterで追加するか、入力欄を空にしてください')
+      return
+    }
     setSubmitting(true)
     try {
       await onSave()
@@ -134,7 +139,11 @@ export default function PhraseEditor({
             className="w-[110px] font-mono text-[13px] px-[12px] py-[9px] bg-surface2 border border-dashed border-border rounded-[9px] text-text-pri placeholder:text-text-mut outline-none focus:border-accent/60 transition-colors"
           />
         </div>
-        {noteError && <div className="text-[12px] text-dim font-jp">{noteError}</div>}
+        {noteError ? (
+          <div className="text-[12px] text-dim font-jp">{noteError}</div>
+        ) : hasPendingNoteInput ? (
+          <div className="text-[12px] text-text-mut font-jp">Enterで追加してから保存できます</div>
+        ) : null}
       </div>
 
       {/* メモ */}
