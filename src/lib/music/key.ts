@@ -1,9 +1,7 @@
 import { Chord, Key } from 'tonal'
 import { isValidChordName } from './chord'
+import { NATURAL_KEYS } from './constants'
 import type { NotePC, ChordName } from '@/types/music'
-
-// KeySelector / ProgressionEditor と同じく、選択可能なキーは自然音7種に限定する
-const NATURAL_KEYS: NotePC[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
 
 export type KeyCandidate = {
   key: NotePC
