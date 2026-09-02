@@ -3,9 +3,8 @@
 import { useState, KeyboardEvent } from 'react'
 import ScaleSelector from '@/components/scale/ScaleSelector'
 import { isValidChordName } from '@/lib/music/chord'
+import { NATURAL_KEYS } from '@/lib/music/constants'
 import type { NotePC, ScaleName, ChordName } from '@/types/music'
-
-const KEYS: NotePC[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
 
 const SELECT_CLASS =
   'w-full bg-surface2 border border-border text-text-pri text-sm font-ui px-[14px] py-[10px] rounded-[10px] cursor-pointer appearance-none'
@@ -101,7 +100,7 @@ export default function ProgressionEditor({
             className={SELECT_CLASS}
             style={SELECT_ARROW}
           >
-            {KEYS.map(k => <option key={k} value={k}>{k}</option>)}
+            {NATURAL_KEYS.map(k => <option key={k} value={k}>{k}</option>)}
           </select>
         </div>
         <div className="flex flex-col gap-[8px]">
