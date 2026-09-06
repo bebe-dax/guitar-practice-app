@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getScaleNotes, getRelativeKey } from '../scale'
-import { getDiatonicChords, isValidChordName } from '../chord'
+import { getDiatonicChords, isValidChordName, getChordRoot } from '../chord'
 import { getScaleLabel } from '../constants'
 
 describe('getScaleNotes', () => {
@@ -136,6 +136,18 @@ describe('isValidChordName', () => {
 
   it.each(['m', '7', '9', 'sus4', 'dim', '5', 'maj7'])('ルート音なしの%sは無効', (chord) => {
     expect(isValidChordName(chord)).toBe(false)
+  })
+})
+
+describe('getChordRoot', () => {
+  it('ルートありコードはtonicを返す', () => {
+    expect(getChordRoot('Cmaj7')).toBe('C')
+    expect(getChordRoot('Am7')).toBe('A')
+  })
+
+  it.each(['m', '7', '9', 'sus4', 'dim'])('ルート音なしの%sは空文字を返さずchordName[0]にフォールバックする', (chord) => {
+    expect(getChordRoot(chord)).toBe(chord[0])
+    expect(getChordRoot(chord)).not.toBe('')
   })
 })
 

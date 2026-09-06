@@ -27,5 +27,6 @@ export function getChordNotes(chordName: ChordName): NotePC[] {
 }
 
 export function getChordRoot(chordName: ChordName): NotePC {
-  return Chord.get(chordName).tonic ?? chordName[0]
+  const tonic = Chord.get(chordName).tonic
+  return tonic ? tonic : chordName[0]
 }

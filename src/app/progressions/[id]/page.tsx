@@ -4,7 +4,7 @@ import { use, useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProgressions } from '@/hooks/useProgressions'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { getChordNotes, getChordRoot } from '@/lib/music/chord'
+import { getChordNotes, getChordRoot, isValidChordName } from '@/lib/music/chord'
 import {
   DEFAULT_FRET_START,
   DEFAULT_FRET_WIDTH,
@@ -64,7 +64,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   const chordRoot = useMemo(() => {
     if (!progression || progression.type !== 'progression') return 'C' as NotePC
     const chord = progression.chords[selectedChordIdx]
-    if (!chord) return 'C' as NotePC
+    if (!chord || !isValidChordName(chord)) return 'C' as NotePC
     return getChordRoot(chord) as NotePC
   }, [progression, selectedChordIdx])
 
