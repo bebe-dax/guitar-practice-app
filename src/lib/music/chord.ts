@@ -17,6 +17,7 @@ export function getDiatonicChords(key: NotePC, scaleName: ScaleName): DiatonicCh
 }
 
 export function isValidChordName(chordName: ChordName): boolean {
+  if (chordName.trim() !== chordName) return false
   const chord = Chord.get(chordName)
   return !chord.empty && chord.tonic !== null && chord.tonic !== ''
 }
