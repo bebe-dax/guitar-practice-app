@@ -1,31 +1,25 @@
-import { Key, Chord, Note, Scale } from 'tonal'
+import { Key, Chord } from 'tonal'
 import { isMinorScale } from './scale'
 import type { NotePC, ChordName, DiatonicChord, ScaleName } from '@/types/music'
 
 const MAJOR_DEGREES = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'] as const
 const MINOR_DEGREES = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'] as const
 
+// ダイアトニックコードはキー（長調/短調）のみで決まり、選択中のスケール（メジャー/
+// ペンタトニック/ブルース等）には依存しない。ペンタトニック・ブルースは特定の
+// 長調/短調キーから派生したサブセットであり、それ自体が独立したダイアトニックコードを
+// 持つわけではないため、常に派生元キーの7コードを返す。
 export function getDiatonicChords(key: NotePC, scaleName: ScaleName): DiatonicChord[] {
   const minor = isMinorScale(scaleName)
   const parentKey = minor ? Key.minorKey(key).natural : Key.majorKey(key)
-  const parentChords = [...parentKey.chords]
-  const parentScale = [...parentKey.scale]
-  const parentDegrees = minor ? MINOR_DEGREES : MAJOR_DEGREES
+  const degrees = minor ? MINOR_DEGREES : MAJOR_DEGREES
+  return parentKey.chords.map((chord, i) => ({ chord, degree: degrees[i] }))
+}
 
-  // 7音スケール（major / minor）: 親キーの 7 ダイアトニックコードをそのまま返す
-  if (scaleName === 'major' || scaleName === 'minor') {
-    return parentChords.map((chord, i) => ({ chord, degree: parentDegrees[i] }))
-  }
-
-  // ペンタトニック / ブルース: スケール構成音ごとに親キーの該当度数のコード・度数を引く
-  // ブルーノート（親キーに無い音）は度数 ♭v、コードはルート音名のみで表示
-  const scaleNotes = Scale.get(`${key} ${scaleName}`).notes
-  return scaleNotes.map((n): DiatonicChord => {
-    const chroma = Note.chroma(n)
-    const idx = parentScale.findIndex(p => Note.chroma(p) === chroma)
-    if (idx >= 0) return { chord: parentChords[idx], degree: parentDegrees[idx] }
-    return { chord: n, degree: '♭v' }
-  })
+export function isValidChordName(chordName: ChordName): boolean {
+  if (chordName.trim() !== chordName) return false
+  const chord = Chord.get(chordName)
+  return !chord.empty && chord.tonic !== null && chord.tonic !== ''
 }
 
 export function getChordNotes(chordName: ChordName): NotePC[] {
@@ -34,5 +28,6 @@ export function getChordNotes(chordName: ChordName): NotePC[] {
 }
 
 export function getChordRoot(chordName: ChordName): NotePC {
-  return Chord.get(chordName).tonic ?? chordName[0]
+  const tonic = Chord.get(chordName).tonic
+  return tonic ? tonic : chordName[0]
 }

@@ -2,9 +2,9 @@
 
 import { useState, KeyboardEvent } from 'react'
 import ScaleSelector from '@/components/scale/ScaleSelector'
-import { isValidChordName } from '@/lib/music/chord'
+import { isValidNoteName } from '@/lib/music/note'
 import { NATURAL_KEYS } from '@/lib/music/constants'
-import type { NotePC, ScaleName, ChordName } from '@/types/music'
+import type { NotePC, ScaleName } from '@/types/music'
 
 const SELECT_CLASS =
   'w-full bg-surface2 border border-border text-text-pri text-sm font-ui px-[14px] py-[10px] rounded-[10px] cursor-pointer appearance-none'
@@ -19,53 +19,53 @@ type Props = {
   title: string; onTitleChange: (v: string) => void
   keyNote: NotePC; onKeyChange: (v: NotePC) => void
   scaleName: ScaleName; onScaleChange: (v: ScaleName) => void
-  chords: ChordName[]; onChordsChange: (v: ChordName[]) => void
+  notes: NotePC[]; onNotesChange: (v: NotePC[]) => void
   memo: string; onMemoChange: (v: string) => void
   onSave: () => Promise<void>
   onCancel: () => void
 }
 
-export default function ProgressionEditor({
+export default function PhraseEditor({
   title, onTitleChange,
   keyNote, onKeyChange,
   scaleName, onScaleChange,
-  chords, onChordsChange,
+  notes, onNotesChange,
   memo, onMemoChange,
   onSave, onCancel,
 }: Props) {
-  const [chordInput, setChordInput] = useState('')
-  const [chordError, setChordError] = useState<string | null>(null)
+  const [noteInput, setNoteInput] = useState('')
+  const [noteError, setNoteError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  function addChord() {
-    const trimmed = chordInput.trim()
+  function addNote() {
+    const trimmed = noteInput.trim()
     if (!trimmed) return
-    if (!isValidChordName(trimmed)) {
-      setChordError(`「${trimmed}」は無効なコード名です`)
+    if (!isValidNoteName(trimmed)) {
+      setNoteError(`「${trimmed}」は無効な音名です`)
       return
     }
-    setChordError(null)
-    onChordsChange([...chords, trimmed])
-    setChordInput('')
+    setNoteError(null)
+    onNotesChange([...notes, trimmed])
+    setNoteInput('')
   }
 
-  function removeChord(idx: number) {
-    onChordsChange(chords.filter((_, i) => i !== idx))
+  function removeNote(idx: number) {
+    onNotesChange(notes.filter((_, i) => i !== idx))
   }
 
-  function handleChordKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+  function handleNoteKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       e.preventDefault()
-      addChord()
+      addNote()
     }
   }
 
-  const hasPendingChordInput = chordInput.trim().length > 0
-  const canSave = title.trim().length > 0 && chords.length > 0 && !hasPendingChordInput && !submitting
+  const hasPendingNoteInput = noteInput.trim().length > 0
+  const canSave = title.trim().length > 0 && notes.length > 0 && !hasPendingNoteInput && !submitting
 
   async function handleSaveClick() {
-    if (hasPendingChordInput) {
-      setChordError('入力中のコード名があります。Enterで追加するか、入力欄を空にしてください')
+    if (hasPendingNoteInput) {
+      setNoteError('入力中の音名があります。Enterで追加するか、入力欄を空にしてください')
       return
     }
     setSubmitting(true)
@@ -85,7 +85,7 @@ export default function ProgressionEditor({
           type="text"
           value={title}
           onChange={e => onTitleChange(e.target.value)}
-          placeholder="例: I–V–vi–IV（定番ポップス）"
+          placeholder="例: イントロのリフ"
           className="bg-surface2 border border-border text-text-pri text-sm font-jp px-[14px] py-[10px] rounded-[10px] outline-none focus:border-accent/60 transition-colors placeholder:text-text-mut"
         />
       </div>
@@ -109,38 +109,38 @@ export default function ProgressionEditor({
         </div>
       </div>
 
-      {/* コード進行 */}
+      {/* 音名リスト */}
       <div className="flex flex-col gap-[8px]">
         <label className="text-[12px] text-text-sec font-medium font-jp">
-          コード進行
+          音名リスト
           <span className="text-text-mut font-normal ml-2">クリックで削除 / Enterで追加</span>
         </label>
         <div className="flex gap-2 flex-wrap items-center">
-          {chords.map((chord, i) => (
+          {notes.map((note, i) => (
             <button
               key={i}
-              onClick={() => removeChord(i)}
+              onClick={() => removeNote(i)}
               className="flex items-center gap-[7px] font-mono text-[13px] font-medium px-[14px] py-[9px] bg-surface2 border border-border rounded-[9px] hover:border-dim transition-colors group"
             >
-              {chord}
+              {note}
               <span className="text-text-mut text-[11px] group-hover:text-dim transition-colors">✕</span>
             </button>
           ))}
           <input
             type="text"
-            value={chordInput}
+            value={noteInput}
             onChange={e => {
-              setChordInput(e.target.value)
-              setChordError(null)
+              setNoteInput(e.target.value)
+              setNoteError(null)
             }}
-            onKeyDown={handleChordKeyDown}
-            placeholder="+ コード名"
+            onKeyDown={handleNoteKeyDown}
+            placeholder="+ 音名"
             className="w-[110px] font-mono text-[13px] px-[12px] py-[9px] bg-surface2 border border-dashed border-border rounded-[9px] text-text-pri placeholder:text-text-mut outline-none focus:border-accent/60 transition-colors"
           />
         </div>
-        {chordError ? (
-          <div className="text-[12px] text-dim font-jp">{chordError}</div>
-        ) : hasPendingChordInput ? (
+        {noteError ? (
+          <div className="text-[12px] text-dim font-jp">{noteError}</div>
+        ) : hasPendingNoteInput ? (
           <div className="text-[12px] text-text-mut font-jp">Enterで追加してから保存できます</div>
         ) : null}
       </div>
@@ -151,7 +151,7 @@ export default function ProgressionEditor({
         <textarea
           value={memo}
           onChange={e => onMemoChange(e.target.value)}
-          placeholder="この進行についてのメモ..."
+          placeholder="このフレーズについてのメモ..."
           rows={3}
           className="bg-surface2 border border-border text-text-pri text-sm font-jp px-[14px] py-[10px] rounded-[10px] outline-none focus:border-accent/60 transition-colors placeholder:text-text-mut resize-none"
         />

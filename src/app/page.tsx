@@ -7,6 +7,7 @@ import FretboardLegend from '@/components/fretboard/FretboardLegend'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
 import KeySelector from '@/components/scale/KeySelector'
 import ScaleSelector from '@/components/scale/ScaleSelector'
+import KeyDetector from '@/components/scale/KeyDetector'
 import ScaleNoteList from '@/components/scale/ScaleNoteList'
 import DiatonicChordList from '@/components/scale/DiatonicChordList'
 import {
@@ -14,11 +15,11 @@ import {
   MOBILE_FRET_WIDTH,
   MAX_FRET_START,
   MOBILE_MAX_FRET_START,
-  SCALE_OPTIONS,
+  getScaleLabel,
 } from '@/lib/music/constants'
 
 export default function Home() {
-  const { key, setKey, scaleName, setScaleName, fretStart, setFretStart, scaleNotes, diatonicChords, isMinor } = useScale()
+  const { key, setKey, scaleName, setScaleName, fretStart, setFretStart, scaleNotes, diatonicChords, isMinor, applyKeyDetection } = useScale()
   // 指板は lg (1024px) 未満を「モバイル相当 = 6 frets」とする
   // タブレット縦 (768) でも 12 frets を押し込むと文字が潰れるため、6 frets 表示にして可読性を確保
   const isCompactFretboard = useIsMobile(1024)
@@ -27,7 +28,7 @@ export default function Home() {
   // ビューポート切替時、保存済み fretStart が新しい上限を超えていれば表示用にクランプ
   const clampedFretStart = Math.min(fretStart, maxFretStart)
 
-  const scaleLabel = SCALE_OPTIONS.find(o => o.value === scaleName)?.label ?? scaleName
+  const scaleLabel = getScaleLabel(scaleName)
 
   return (
     <div className="flex flex-col h-full gap-4">
@@ -67,6 +68,9 @@ export default function Home() {
           <div>
             <div className="text-[12px] text-text-sec font-medium font-jp mb-[10px]">スケール</div>
             <ScaleSelector value={scaleName} onChange={setScaleName} />
+          </div>
+          <div className="pt-4 border-t border-border">
+            <KeyDetector onSelect={applyKeyDetection} />
           </div>
         </div>
 

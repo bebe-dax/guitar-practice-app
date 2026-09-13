@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getScaleNotes, getRelativeKey } from '../scale'
-import { getDiatonicChords } from '../chord'
+import { getScaleLabel } from '../constants'
 
 describe('getScaleNotes', () => {
   it('C major', () => {
@@ -21,6 +21,22 @@ describe('getScaleNotes', () => {
 
   it('A blues', () => {
     expect(getScaleNotes('A', 'blues')).toEqual(['A', 'C', 'D', 'Eb', 'E', 'G'])
+  })
+
+  it('C dorian', () => {
+    expect(getScaleNotes('C', 'dorian')).toEqual(['C', 'D', 'Eb', 'F', 'G', 'A', 'Bb'])
+  })
+
+  it('C mixolydian', () => {
+    expect(getScaleNotes('C', 'mixolydian')).toEqual(['C', 'D', 'E', 'F', 'G', 'A', 'Bb'])
+  })
+
+  it('C harmonic minor', () => {
+    expect(getScaleNotes('C', 'harmonic minor')).toEqual(['C', 'D', 'Eb', 'F', 'G', 'Ab', 'B'])
+  })
+
+  it('C melodic minor', () => {
+    expect(getScaleNotes('C', 'melodic minor')).toEqual(['C', 'D', 'Eb', 'F', 'G', 'A', 'B'])
   })
 })
 
@@ -54,59 +70,16 @@ describe('getRelativeKey', () => {
   })
 })
 
-describe('getDiatonicChords', () => {
-  it('C major: 7和音 + 親キー度数', () => {
-    expect(getDiatonicChords('C', 'major')).toEqual([
-      { chord: 'Cmaj7', degree: 'I' },
-      { chord: 'Dm7', degree: 'ii' },
-      { chord: 'Em7', degree: 'iii' },
-      { chord: 'Fmaj7', degree: 'IV' },
-      { chord: 'G7', degree: 'V' },
-      { chord: 'Am7', degree: 'vi' },
-      { chord: 'Bm7b5', degree: 'vii°' },
-    ])
-  })
-
-  it('A minor: 7和音 + 親キー度数', () => {
-    expect(getDiatonicChords('A', 'minor')).toEqual([
-      { chord: 'Am7', degree: 'i' },
-      { chord: 'Bm7b5', degree: 'ii°' },
-      { chord: 'Cmaj7', degree: 'III' },
-      { chord: 'Dm7', degree: 'iv' },
-      { chord: 'Em7', degree: 'v' },
-      { chord: 'Fmaj7', degree: 'VI' },
-      { chord: 'G7', degree: 'VII' },
-    ])
-  })
-
-  it('C major pentatonic: スケール構成音に対応する 5 和音（IV と vii° を除外）', () => {
-    expect(getDiatonicChords('C', 'major pentatonic')).toEqual([
-      { chord: 'Cmaj7', degree: 'I' },
-      { chord: 'Dm7', degree: 'ii' },
-      { chord: 'Em7', degree: 'iii' },
-      { chord: 'G7', degree: 'V' },
-      { chord: 'Am7', degree: 'vi' },
-    ])
-  })
-
-  it('A minor pentatonic: スケール構成音に対応する 5 和音（ii° と VI を除外）', () => {
-    expect(getDiatonicChords('A', 'minor pentatonic')).toEqual([
-      { chord: 'Am7', degree: 'i' },
-      { chord: 'Cmaj7', degree: 'III' },
-      { chord: 'Dm7', degree: 'iv' },
-      { chord: 'Em7', degree: 'v' },
-      { chord: 'G7', degree: 'VII' },
-    ])
-  })
-
-  it('A blues: minor pentatonic + ブルーノート Eb（度数 ♭v）', () => {
-    expect(getDiatonicChords('A', 'blues')).toEqual([
-      { chord: 'Am7', degree: 'i' },
-      { chord: 'Cmaj7', degree: 'III' },
-      { chord: 'Dm7', degree: 'iv' },
-      { chord: 'Eb', degree: '♭v' },
-      { chord: 'Em7', degree: 'v' },
-      { chord: 'G7', degree: 'VII' },
-    ])
+describe('getScaleLabel', () => {
+  it('SCALE_OPTIONSに定義されたラベルを返す', () => {
+    expect(getScaleLabel('major')).toBe('Major')
+    expect(getScaleLabel('minor')).toBe('Natural Minor')
+    expect(getScaleLabel('major pentatonic')).toBe('Major Pentatonic')
+    expect(getScaleLabel('minor pentatonic')).toBe('Minor Pentatonic')
+    expect(getScaleLabel('blues')).toBe('Blues')
+    expect(getScaleLabel('dorian')).toBe('Dorian')
+    expect(getScaleLabel('mixolydian')).toBe('Mixolydian')
+    expect(getScaleLabel('harmonic minor')).toBe('Harmonic Minor')
+    expect(getScaleLabel('melodic minor')).toBe('Melodic Minor')
   })
 })

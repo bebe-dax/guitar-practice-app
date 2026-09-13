@@ -4,20 +4,20 @@ import { use, useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProgressions } from '@/hooks/useProgressions'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { getChordNotes, getChordRoot } from '@/lib/music/chord'
-import { getNotesOnFretboard } from '@/lib/music/fretboard'
+import { getChordNotes, getChordRoot, isValidChordName } from '@/lib/music/chord'
 import {
   DEFAULT_FRET_START,
   DEFAULT_FRET_WIDTH,
   MOBILE_FRET_WIDTH,
   MAX_FRET_START,
   MOBILE_MAX_FRET_START,
-  SCALE_OPTIONS,
+  getScaleLabel,
 } from '@/lib/music/constants'
 import Fretboard from '@/components/fretboard/Fretboard'
 import FretRangeSlider from '@/components/fretboard/FretRangeSlider'
 import ProgressionPlayer from '@/components/progression/ProgressionPlayer'
 import ProgressionEditor from '@/components/progression/ProgressionEditor'
+import PhraseEditor from '@/components/progression/PhraseEditor'
 import type { NotePC, ScaleName, ChordName } from '@/types/music'
 
 function formatDate(iso: string): string {
@@ -38,6 +38,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   const [fretStart, setFretStart] = useState(DEFAULT_FRET_START)
   const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
   const clampedFretStart = Math.min(fretStart, maxFretStart)
@@ -47,28 +48,25 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   const [editKey, setEditKey] = useState<NotePC>('C')
   const [editScale, setEditScale] = useState<ScaleName>('major')
   const [editChords, setEditChords] = useState<ChordName[]>([])
+  const [editNotes, setEditNotes] = useState<NotePC[]>([])
   const [editMemo, setEditMemo] = useState('')
 
   const progression = progressions.find(p => p.id === id)
+  const isPhrase = progression?.type === 'phrase'
 
   const chordNotes = useMemo(() => {
-    if (!progression) return []
+    if (!progression || progression.type !== 'progression') return []
     const chord = progression.chords[selectedChordIdx]
     if (!chord) return []
     return getChordNotes(chord)
   }, [progression, selectedChordIdx])
 
   const chordRoot = useMemo(() => {
-    if (!progression) return 'C' as NotePC
+    if (!progression || progression.type !== 'progression') return 'C' as NotePC
     const chord = progression.chords[selectedChordIdx]
-    if (!chord) return 'C' as NotePC
+    if (!chord || !isValidChordName(chord)) return 'C' as NotePC
     return getChordRoot(chord) as NotePC
   }, [progression, selectedChordIdx])
-
-  const fretboardNotes = useMemo(() => {
-    if (chordNotes.length === 0) return []
-    return getNotesOnFretboard(chordNotes, chordRoot, clampedFretStart, clampedFretStart + fretWidth)
-  }, [chordNotes, chordRoot, clampedFretStart, fretWidth])
 
   useEffect(() => {
     if (!loading && !progression) {
@@ -78,13 +76,19 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
 
   if (loading || !progression) return null
 
-  const scaleLabel = SCALE_OPTIONS.find(o => o.value === progression.scale)?.label ?? progression.scale
+  const scaleLabel = getScaleLabel(progression.scale)
+  const previewNotes = isPhrase ? progression.notes : chordNotes
+  const previewRoot = isPhrase ? progression.key : chordRoot
 
   function startEdit() {
     setEditTitle(progression!.title)
     setEditKey(progression!.key)
     setEditScale(progression!.scale)
-    setEditChords([...progression!.chords])
+    if (progression!.type === 'progression') {
+      setEditChords([...progression!.chords])
+    } else {
+      setEditNotes([...progression!.notes])
+    }
     setEditMemo(progression!.memo)
     setIsEditing(true)
   }
@@ -92,7 +96,11 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
   async function handleUpdate() {
     setSaveError(null)
     try {
-      await update(id, { title: editTitle, key: editKey, scale: editScale, chords: editChords, memo: editMemo })
+      if (progression!.type === 'progression') {
+        await update(id, { type: 'progression', title: editTitle, key: editKey, scale: editScale, chords: editChords, memo: editMemo })
+      } else {
+        await update(id, { type: 'phrase', title: editTitle, key: editKey, scale: editScale, notes: editNotes, memo: editMemo })
+      }
       setIsEditing(false)
     } catch {
       setSaveError('更新に失敗しました')
@@ -101,11 +109,13 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
 
   async function handleDelete() {
     setSaveError(null)
+    setDeleting(true)
     try {
       await remove(id)
       router.push('/progressions')
     } catch {
       setSaveError('削除に失敗しました')
+      setDeleting(false)
     }
   }
 
@@ -117,15 +127,27 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
           <div className="text-[12px] text-text-sec mt-[3px] font-jp">{progression.title}</div>
           {saveError && <div className="text-[12px] text-dim font-jp mt-1">{saveError}</div>}
         </div>
-        <ProgressionEditor
-          title={editTitle} onTitleChange={setEditTitle}
-          keyNote={editKey} onKeyChange={setEditKey}
-          scaleName={editScale} onScaleChange={setEditScale}
-          chords={editChords} onChordsChange={setEditChords}
-          memo={editMemo} onMemoChange={setEditMemo}
-          onSave={handleUpdate}
-          onCancel={() => setIsEditing(false)}
-        />
+        {progression.type === 'progression' ? (
+          <ProgressionEditor
+            title={editTitle} onTitleChange={setEditTitle}
+            keyNote={editKey} onKeyChange={setEditKey}
+            scaleName={editScale} onScaleChange={setEditScale}
+            chords={editChords} onChordsChange={setEditChords}
+            memo={editMemo} onMemoChange={setEditMemo}
+            onSave={handleUpdate}
+            onCancel={() => setIsEditing(false)}
+          />
+        ) : (
+          <PhraseEditor
+            title={editTitle} onTitleChange={setEditTitle}
+            keyNote={editKey} onKeyChange={setEditKey}
+            scaleName={editScale} onScaleChange={setEditScale}
+            notes={editNotes} onNotesChange={setEditNotes}
+            memo={editMemo} onMemoChange={setEditMemo}
+            onSave={handleUpdate}
+            onCancel={() => setIsEditing(false)}
+          />
+        )}
       </div>
     )
   }
@@ -137,7 +159,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
         <div className="min-w-0">
           <div className="mb-2">
             <span className="text-[11px] font-jp px-[11px] py-[3px] rounded-full border border-accent/40 text-accent bg-accent-bg">
-              コード進行
+              {isPhrase ? 'フレーズ' : 'コード進行'}
             </span>
           </div>
           <div className="text-[20px] font-bold tracking-[-0.01em] font-jp break-words">{progression.title}</div>
@@ -158,13 +180,15 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
               <span className="text-[12px] text-text-sec font-jp">本当に削除しますか？</span>
               <button
                 onClick={handleDelete}
-                className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-dim/20 border border-dim/40 text-dim hover:bg-dim/30 transition-colors"
+                disabled={deleting}
+                className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-dim/20 border border-dim/40 text-dim hover:bg-dim/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 削除する
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-surface2 border border-border text-text-sec hover:bg-surface3 transition-colors"
+                disabled={deleting}
+                className="text-[13px] font-medium font-jp px-[14px] py-[8px] rounded-[9px] bg-surface2 border border-border text-text-sec hover:bg-surface3 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 キャンセル
               </button>
@@ -185,18 +209,20 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
         <div className="flex items-baseline justify-between text-[12px] font-medium font-jp mb-[10px]">
           <span className="text-text-sec">指板プレビュー</span>
           <span className="text-[11px] text-text-mut font-mono">
-            {progression.chords[selectedChordIdx] ?? '—'} の構成音 ({chordNotes.join(', ')})
+            {isPhrase
+              ? `音名リスト (${progression.notes.join(', ')})`
+              : `${progression.chords[selectedChordIdx] ?? '—'} の構成音 (${chordNotes.join(', ')})`}
           </span>
         </div>
         <div className="overflow-x-auto">
-          <Fretboard scaleNotes={chordNotes} rootNote={chordRoot} fretStart={clampedFretStart} fretWidth={fretWidth} />
+          <Fretboard scaleNotes={previewNotes} rootNote={previewRoot} fretStart={clampedFretStart} fretWidth={fretWidth} />
         </div>
         <div className="mt-[10px]">
           <FretRangeSlider value={clampedFretStart} onChange={setFretStart} max={maxFretStart} />
         </div>
       </div>
 
-      {/* 下段: メタ情報 + ステッパー */}
+      {/* 下段: メタ情報 + ステッパー/音名リスト */}
       <div className="grid gap-4 flex-1 min-h-0 grid-cols-1 md:[grid-template-columns:360px_1fr] md:items-stretch">
         {/* メタ情報 */}
         <div className="bg-surface border border-border rounded-[14px] p-[18px_20px] flex flex-col gap-4">
@@ -216,17 +242,35 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
           )}
         </div>
 
-        {/* コードステッパー */}
+        {/* コードステッパー / 音名リスト */}
         <div className="bg-surface border border-border rounded-[14px] p-[18px_20px] flex flex-col justify-center gap-4">
-          <div className="text-[12px] text-text-sec font-medium font-jp">
-            コード進行
-            <span className="text-text-mut font-normal ml-2">クリックで指板に表示</span>
-          </div>
-          <ProgressionPlayer
-            chords={progression.chords}
-            selectedIdx={selectedChordIdx}
-            onSelect={setSelectedChordIdx}
-          />
+          {isPhrase ? (
+            <>
+              <div className="text-[12px] text-text-sec font-medium font-jp">音名リスト</div>
+              <div className="flex gap-2 flex-wrap">
+                {progression.notes.map((note, i) => (
+                  <span
+                    key={i}
+                    className="font-mono text-[15px] font-semibold px-[22px] py-[11px] rounded-[11px] border-[1.5px] bg-note-bg border-note text-note"
+                  >
+                    {note}
+                  </span>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-[12px] text-text-sec font-medium font-jp">
+                コード進行
+                <span className="text-text-mut font-normal ml-2">クリックで指板に表示</span>
+              </div>
+              <ProgressionPlayer
+                chords={progression.chords}
+                selectedIdx={selectedChordIdx}
+                onSelect={setSelectedChordIdx}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

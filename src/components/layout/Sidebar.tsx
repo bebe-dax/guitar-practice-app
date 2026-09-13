@@ -184,6 +184,7 @@ export default function Sidebar({ user, onLogout }: Props) {
           className="fixed top-[18px] z-50 w-7 h-7 rounded-full bg-surface2 border border-border text-text-sec text-xs grid place-items-center hover:text-text-pri hover:bg-surface3 transition-all duration-[220ms] ease-in-out"
           style={{ left: open ? 'calc(224px - 14px)' : 'calc(64px - 14px)' }}
           title="サイドバーを開閉"
+          aria-label={open ? 'サイドバーを閉じる' : 'サイドバーを開く'}
         >
           {open ? '◀' : '▶'}
         </button>

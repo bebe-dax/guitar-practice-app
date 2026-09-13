@@ -3,6 +3,7 @@ import { getScaleNotes, getRelativeKey, isMinorScale } from '@/lib/music/scale'
 import { getDiatonicChords } from '@/lib/music/chord'
 import { DEFAULT_FRET_START } from '@/lib/music/constants'
 import type { NotePC, ScaleName } from '@/types/music'
+import type { KeyCandidate } from '@/lib/music/key'
 
 const STORAGE_KEY = 'guitar-app:scale'
 
@@ -59,5 +60,17 @@ export function useScale() {
     setScaleName(newScale)
   }
 
-  return { key, setKey, scaleName, setScaleName: changeScale, fretStart, setFretStart, scaleNotes, diatonicChords, isMinor }
+  // キー判定結果をそのまま反映する（相対調自動連動を経由しない直接反映）
+  function applyKeyDetection(candidate: KeyCandidate) {
+    setKey(candidate.key)
+    setScaleName(candidate.isMinor ? 'minor' : 'major')
+  }
+
+  return {
+    key, setKey,
+    scaleName, setScaleName: changeScale,
+    fretStart, setFretStart,
+    scaleNotes, diatonicChords, isMinor,
+    applyKeyDetection,
+  }
 }
