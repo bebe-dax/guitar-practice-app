@@ -11,7 +11,7 @@ export default function DiatonicChordList({ chords }: Props) {
     // デスクトップ(~700px超): 7コード全て1行
     <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(72px,1fr))]">
       {chords.map(({ chord, degree }, i) => {
-        const isDim = degree.includes('°') || degree.includes('♭')
+        const isDim = degree.includes('°')
         const isRoot = i === 0
 
         return (
@@ -20,14 +20,14 @@ export default function DiatonicChordList({ chords }: Props) {
             className={[
               'rounded-[11px] py-[11px] px-1 text-center transition-all duration-[120ms] flex flex-col gap-[5px] border min-w-0',
               isRoot
-                ? 'bg-accent-bg border-accent/40'
+                ? 'bg-root-bg border-root/40'
                 : 'bg-surface2 border-transparent',
             ].join(' ')}
           >
             <div className={['text-[11px] font-mono', isDim ? 'text-dim' : 'text-text-mut'].join(' ')}>
               {degree}
             </div>
-            <div className={['text-[15px] md:text-[16px] font-semibold font-mono truncate', isRoot ? 'text-accent' : ''].join(' ')}>
+            <div className={['text-[15px] md:text-[16px] font-semibold font-mono truncate', isRoot ? 'text-root' : ''].join(' ')}>
               {chord}
             </div>
           </div>
