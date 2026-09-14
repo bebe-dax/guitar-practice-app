@@ -13,6 +13,15 @@ const NAV_ITEMS = [
 
 const MOBILE_BREAKPOINT = 768 // px (= Tailwind md)
 
+// 「コード進行」(/progressions) は詳細/編集ページ(/progressions/:id)でも
+// アクティブにするが、「新規作成」(/progressions/new) とは二重にハイライトしない。
+function isNavActive(pathname: string, href: string): boolean {
+  if (href === '/progressions') {
+    return pathname === href || (pathname.startsWith('/progressions/') && pathname !== '/progressions/new')
+  }
+  return pathname === href
+}
+
 type Props = {
   user: User
   onLogout: () => void
@@ -98,7 +107,7 @@ export default function Sidebar({ user, onLogout }: Props) {
 
         {/* ナビゲーション */}
         {NAV_ITEMS.map(({ href, icon, label }) => {
-          const isActive = pathname === href
+          const isActive = isNavActive(pathname, href)
           return (
             <Link
               key={href}
