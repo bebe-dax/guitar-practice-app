@@ -11,7 +11,6 @@ const PHRASE_ACCENT_COLOR = 'var(--color-amber)'
 
 type Props = {
   progression: ProgressionItem
-  index: number
 }
 
 function formatDate(iso: string): string {
@@ -22,11 +21,22 @@ function formatDate(iso: string): string {
   return `${y}/${m}/${day}`
 }
 
-export default function ProgressionCard({ progression, index }: Props) {
+// 検索・フィルタで配列内の位置が変わっても同じ進行の色が変化しないよう、
+// 配列位置ではなくidから安定したハッシュ値でアクセントカラーを決定する。
+function hashCode(str: string): number {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i)
+    hash |= 0
+  }
+  return Math.abs(hash)
+}
+
+export default function ProgressionCard({ progression }: Props) {
   const isPhrase = progression.type === 'phrase'
   const accentColor = isPhrase
     ? PHRASE_ACCENT_COLOR
-    : PROGRESSION_ACCENT_COLORS[index % PROGRESSION_ACCENT_COLORS.length]
+    : PROGRESSION_ACCENT_COLORS[hashCode(progression.id) % PROGRESSION_ACCENT_COLORS.length]
   const tokens = isPhrase ? progression.notes : progression.chords
 
   return (
