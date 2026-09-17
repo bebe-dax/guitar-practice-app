@@ -101,8 +101,8 @@ export default function ProgressionsPage() {
         </div>
       ) : (
         <div className="grid gap-[14px] overflow-y-auto grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((progression, i) => (
-            <ProgressionCard key={progression.id} progression={progression} index={i} />
+          {filtered.map(progression => (
+            <ProgressionCard key={progression.id} progression={progression} />
           ))}
         </div>
       )}
