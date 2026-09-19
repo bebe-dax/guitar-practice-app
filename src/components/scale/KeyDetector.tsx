@@ -1,49 +1,54 @@
-'use client'
+"use client";
 
-import { useState, KeyboardEvent } from 'react'
-import { detectKey } from '@/lib/music/key'
-import type { KeyCandidate } from '@/lib/music/key'
+import { useId, useState, KeyboardEvent } from "react";
+import { detectKey } from "@/lib/music/key";
+import type { KeyCandidate } from "@/lib/music/key";
 
 type Props = {
-  onSelect: (candidate: KeyCandidate) => void
-}
+  onSelect: (candidate: KeyCandidate) => void;
+};
 
-const CANDIDATE_LABEL = (c: KeyCandidate) => `${c.key}${c.isMinor ? 'm' : ''}`
+const CANDIDATE_LABEL = (c: KeyCandidate) => `${c.key}${c.isMinor ? "m" : ""}`;
 
 export default function KeyDetector({ onSelect }: Props) {
-  const [input, setInput] = useState('')
-  const [candidates, setCandidates] = useState<KeyCandidate[] | null>(null)
+  const [input, setInput] = useState("");
+  const [candidates, setCandidates] = useState<KeyCandidate[] | null>(null);
+  const inputId = useId();
 
   function handleDetect() {
-    const chords = input.trim().split(/\s+/).filter(Boolean)
-    setCandidates(chords.length > 0 ? detectKey(chords) : null)
+    const chords = input.trim().split(/\s+/).filter(Boolean);
+    setCandidates(chords.length > 0 ? detectKey(chords) : null);
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleDetect()
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleDetect();
     }
   }
 
   function handleSelect(candidate: KeyCandidate) {
-    onSelect(candidate)
-    setCandidates(null)
+    onSelect(candidate);
+    setCandidates(null);
   }
 
   return (
     <div className="flex flex-col gap-[8px]">
-      <label className="text-[12px] text-text-sec font-medium font-jp">
+      <label
+        htmlFor={inputId}
+        className="text-[12px] text-text-sec font-medium font-jp"
+      >
         コードからキーを判定
         <span className="text-text-mut font-normal ml-2">例: Am F C G</span>
       </label>
       <div className="flex gap-2">
         <input
+          id={inputId}
           type="text"
           value={input}
-          onChange={e => {
-            setInput(e.target.value)
-            setCandidates(null)
+          onChange={(e) => {
+            setInput(e.target.value);
+            setCandidates(null);
           }}
           onKeyDown={handleKeyDown}
           placeholder="コード名をスペース区切りで入力"
@@ -76,9 +81,11 @@ export default function KeyDetector({ onSelect }: Props) {
 
       {candidates !== null && candidates.length > 1 && (
         <div className="flex flex-col gap-[6px]">
-          <div className="text-[12px] text-text-mut font-jp">複数の候補があります。選択してください</div>
+          <div className="text-[12px] text-text-mut font-jp">
+            複数の候補があります。選択してください
+          </div>
           <div className="flex gap-2 flex-wrap">
-            {candidates.map(c => (
+            {candidates.map((c) => (
               <button
                 key={CANDIDATE_LABEL(c)}
                 type="button"
@@ -92,5 +99,5 @@ export default function KeyDetector({ onSelect }: Props) {
         </div>
       )}
     </div>
-  )
+  );
 }

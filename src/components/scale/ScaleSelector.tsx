@@ -6,11 +6,13 @@ import type { ScaleName } from '@/types/music'
 type Props = {
   value: ScaleName
   onChange: (scale: ScaleName) => void
+  id?: string
 }
 
-export default function ScaleSelector({ value, onChange }: Props) {
+export default function ScaleSelector({ value, onChange, id }: Props) {
   return (
     <select
+      id={id}
       value={value}
       onChange={e => onChange(e.target.value as ScaleName)}
       className="w-full bg-surface2 border border-border text-text-pri text-sm font-ui px-[14px] py-[10px] rounded-[10px] cursor-pointer appearance-none"
