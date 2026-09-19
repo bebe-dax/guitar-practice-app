@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, KeyboardEvent } from 'react'
+import { useId, useState, KeyboardEvent } from 'react'
 import ScaleSelector from '@/components/scale/ScaleSelector'
 import { isValidNoteName } from '@/lib/music/note'
 import { NATURAL_KEYS } from '@/lib/music/constants'
@@ -36,6 +36,12 @@ export default function PhraseEditor({
   const [noteInput, setNoteInput] = useState('')
   const [noteError, setNoteError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  const titleId = useId()
+  const keyId = useId()
+  const scaleId = useId()
+  const noteInputId = useId()
+  const memoId = useId()
 
   function addNote() {
     const trimmed = noteInput.trim()
@@ -80,8 +86,9 @@ export default function PhraseEditor({
     <div className="bg-surface border border-border rounded-[14px] p-[22px] flex flex-col gap-5">
       {/* タイトル */}
       <div className="flex flex-col gap-[8px]">
-        <label className="text-[12px] text-text-sec font-medium font-jp">タイトル</label>
+        <label htmlFor={titleId} className="text-[12px] text-text-sec font-medium font-jp">タイトル</label>
         <input
+          id={titleId}
           type="text"
           value={title}
           onChange={e => onTitleChange(e.target.value)}
@@ -93,8 +100,9 @@ export default function PhraseEditor({
       {/* キー / スケール */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-[8px]">
-          <label className="text-[12px] text-text-sec font-medium font-jp">キー</label>
+          <label htmlFor={keyId} className="text-[12px] text-text-sec font-medium font-jp">キー</label>
           <select
+            id={keyId}
             value={keyNote}
             onChange={e => onKeyChange(e.target.value as NotePC)}
             className={SELECT_CLASS}
@@ -104,14 +112,14 @@ export default function PhraseEditor({
           </select>
         </div>
         <div className="flex flex-col gap-[8px]">
-          <label className="text-[12px] text-text-sec font-medium font-jp">スケール</label>
-          <ScaleSelector value={scaleName} onChange={onScaleChange} />
+          <label htmlFor={scaleId} className="text-[12px] text-text-sec font-medium font-jp">スケール</label>
+          <ScaleSelector id={scaleId} value={scaleName} onChange={onScaleChange} />
         </div>
       </div>
 
       {/* 音名リスト */}
       <div className="flex flex-col gap-[8px]">
-        <label className="text-[12px] text-text-sec font-medium font-jp">
+        <label htmlFor={noteInputId} className="text-[12px] text-text-sec font-medium font-jp">
           音名リスト
           <span className="text-text-mut font-normal ml-2">クリックで削除 / Enterで追加</span>
         </label>
@@ -127,6 +135,7 @@ export default function PhraseEditor({
             </button>
           ))}
           <input
+            id={noteInputId}
             type="text"
             value={noteInput}
             onChange={e => {
@@ -147,8 +156,9 @@ export default function PhraseEditor({
 
       {/* メモ */}
       <div className="flex flex-col gap-[8px]">
-        <label className="text-[12px] text-text-sec font-medium font-jp">メモ</label>
+        <label htmlFor={memoId} className="text-[12px] text-text-sec font-medium font-jp">メモ</label>
         <textarea
+          id={memoId}
           value={memo}
           onChange={e => onMemoChange(e.target.value)}
           placeholder="このフレーズについてのメモ..."
