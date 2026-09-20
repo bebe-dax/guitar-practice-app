@@ -91,6 +91,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
     }
     setEditMemo(progression!.memo)
     setIsEditing(true)
+    setConfirmDelete(false)
   }
 
   async function handleUpdate() {
@@ -102,6 +103,7 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
         await update(id, { type: 'phrase', title: editTitle, key: editKey, scale: editScale, notes: editNotes, memo: editMemo })
       }
       setIsEditing(false)
+      setConfirmDelete(false)
     } catch {
       setSaveError('更新に失敗しました')
     }
