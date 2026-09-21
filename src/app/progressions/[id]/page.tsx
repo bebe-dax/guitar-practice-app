@@ -74,7 +74,17 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
     }
   }, [loading, progression, router])
 
-  if (loading || !progression) return null
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full gap-4">
+        <div className="flex-1 flex items-center justify-center text-text-mut">
+          <div className="text-[13px] font-jp">読み込み中...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!progression) return null
 
   const scaleLabel = getScaleLabel(progression.scale)
   const previewNotes = isPhrase ? progression.notes : chordNotes
