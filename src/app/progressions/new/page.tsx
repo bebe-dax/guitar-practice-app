@@ -72,9 +72,9 @@ export default function NewProgressionPage() {
     setSaveError(null)
     try {
       if (itemType === 'progression') {
-        await save({ type: 'progression', title, key: keyNote, scale: scaleName, chords, memo })
+        await save({ type: 'progression', title: title.trim(), key: keyNote, scale: scaleName, chords, memo: memo.trim() })
       } else {
-        await save({ type: 'phrase', title, key: keyNote, scale: scaleName, notes, memo })
+        await save({ type: 'phrase', title: title.trim(), key: keyNote, scale: scaleName, notes, memo: memo.trim() })
       }
       router.push('/progressions')
     } catch {
