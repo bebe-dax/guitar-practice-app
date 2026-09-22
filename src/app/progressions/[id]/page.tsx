@@ -108,9 +108,9 @@ export default function ProgressionDetailPage({ params }: { params: Promise<{ id
     setSaveError(null)
     try {
       if (progression!.type === 'progression') {
-        await update(id, { type: 'progression', title: editTitle, key: editKey, scale: editScale, chords: editChords, memo: editMemo })
+        await update(id, { type: 'progression', title: editTitle.trim(), key: editKey, scale: editScale, chords: editChords, memo: editMemo.trim() })
       } else {
-        await update(id, { type: 'phrase', title: editTitle, key: editKey, scale: editScale, notes: editNotes, memo: editMemo })
+        await update(id, { type: 'phrase', title: editTitle.trim(), key: editKey, scale: editScale, notes: editNotes, memo: editMemo.trim() })
       }
       setIsEditing(false)
       setConfirmDelete(false)
