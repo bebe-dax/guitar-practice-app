@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Timestamp } from 'firebase/firestore'
 import { listProgressions, createProgression, updateProgression, deleteProgression } from '../progressions'
+import { firebaseAuth } from '@/lib/firebase/client'
 
 const mockAddDoc = vi.fn()
 const mockUpdateDoc = vi.fn()
@@ -115,6 +116,28 @@ describe('progressions APIクライアント(Firestore)', () => {
     await deleteProgression('abc-123')
 
     expect(mockDeleteDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'abc-123' }))
+  })
+
+  describe('未ログイン状態', () => {
+    const mutableAuth = firebaseAuth as { currentUser: { uid: string } | null }
+
+    afterEach(() => {
+      mutableAuth.currentUser = { uid: 'user-1' }
+    })
+
+    it('updateProgression は未ログイン状態で呼ぶとログインが必要ですエラーになる', async () => {
+      mutableAuth.currentUser = null
+
+      await expect(updateProgression('abc-123', input)).rejects.toThrow('ログインが必要です')
+      expect(mockUpdateDoc).not.toHaveBeenCalled()
+    })
+
+    it('deleteProgression は未ログイン状態で呼ぶとログインが必要ですエラーになる', async () => {
+      mutableAuth.currentUser = null
+
+      await expect(deleteProgression('abc-123')).rejects.toThrow('ログインが必要です')
+      expect(mockDeleteDoc).not.toHaveBeenCalled()
+    })
   })
 
   it('listProgressions は type: "phrase" のドキュメントを notes フィールドで解釈する', async () => {
