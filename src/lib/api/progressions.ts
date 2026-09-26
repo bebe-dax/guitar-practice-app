@@ -92,6 +92,7 @@ export async function createProgression(data: ProgressionItemInput): Promise<Pro
 }
 
 export async function updateProgression(id: string, data: ProgressionItemInput): Promise<ProgressionItem> {
+  requireUid()
   const ref = doc(firestore, COLLECTION, id)
   await updateDoc(ref, { ...data, updatedAt: serverTimestamp() })
   const snapshot = await getDocFromServer(ref)
@@ -101,5 +102,6 @@ export async function updateProgression(id: string, data: ProgressionItemInput):
 }
 
 export async function deleteProgression(id: string): Promise<void> {
+  requireUid()
   await deleteDoc(doc(firestore, COLLECTION, id))
 }
